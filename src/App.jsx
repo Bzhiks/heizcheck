@@ -83,8 +83,8 @@ function BeispielRechnung() {
 function LandingPage({ onStart, isMobile }) {
   return (
     <div style={{
-      maxWidth: '1140px', margin: '0 auto',
-      padding: isMobile ? '2rem 1.25rem 3rem' : '3.5rem 80px 4rem'
+      maxWidth: "100%", margin: '0 auto',
+      padding: isMobile ? "2rem 1.25rem 3rem" : "3.5rem 6% 4rem"
     }}>
 
       <div style={{
