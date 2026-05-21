@@ -10,7 +10,7 @@ function Nav({ onLogo }) {
   return (
     <nav style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '20px 24px', borderBottom: '1px solid #f0efed'
+      padding: '16px 20px', borderBottom: '1px solid #f0efed'
     }}>
       <button onClick={onLogo} style={{
         background: 'none', border: 'none', fontSize: '16px',
@@ -28,8 +28,8 @@ function Nav({ onLogo }) {
 
 function LandingPage({ onStart }) {
   return (
-    <div style={{ maxWidth: '560px', margin: '0 auto', padding: '4rem 1.5rem 3rem' }}>
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+    <div style={{ maxWidth: '560px', margin: '0 auto', padding: '2rem 1.25rem 3rem' }}>
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
         {['Kostenlos', 'Ohne Verkäufer', '3 Minuten'].map(t => (
           <span key={t} style={{
             fontSize: '11px', fontWeight: 500, color: '#085041',
@@ -39,7 +39,7 @@ function LandingPage({ onStart }) {
       </div>
 
       <h1 style={{
-        fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 500,
+        fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 500,
         lineHeight: 1.15, letterSpacing: '-0.5px', marginBottom: '1rem', color: '#0a0a0a'
       }}>
         Erfahre was eine Wärmepumpe wirklich{' '}
@@ -48,23 +48,23 @@ function LandingPage({ onStart }) {
       </h1>
 
       <p style={{
-        fontSize: '16px', color: '#6b6966', lineHeight: 1.65,
-        marginBottom: '2rem', maxWidth: '480px'
+        fontSize: '15px', color: '#6b6966', lineHeight: 1.65,
+        marginBottom: '1.75rem', maxWidth: '480px'
       }}>
         Kein Anruf, kein Druck, kein Verkaufsgespräch. 15 kurze Fragen — du bekommst
         Kosten, Förderung und Ersparnis konkret für deine Situation.
       </p>
 
       <button onClick={onStart} style={{
-        padding: '15px 36px', background: '#0a0a0a', color: '#fff',
+        padding: '15px 28px', background: '#0a0a0a', color: '#fff',
         border: 'none', borderRadius: '12px', fontSize: '15px',
         fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-        marginBottom: '1.5rem', display: 'block'
+        marginBottom: '1.5rem', display: 'block', width: '100%'
       }}>
         Jetzt kostenlos berechnen →
       </button>
 
-      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '2rem' }}>
         {[['1.200+', 'Berechnungen'], ['4.9 / 5', 'Bewertung'], ['95%', 'Angebotsgenauigkeit']].map(([zahl, label]) => (
           <div key={label}>
             <div style={{ fontSize: '18px', fontWeight: 500, color: '#0a0a0a' }}>{zahl}</div>
@@ -73,8 +73,8 @@ function LandingPage({ onStart }) {
         ))}
       </div>
 
-      <div style={{ marginTop: '3rem', padding: '20px', background: '#f8f8f7', borderRadius: '12px' }}>
-        <div style={{ fontSize: '12px', color: '#a09e9a', marginBottom: '12px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <div style={{ padding: '16px', background: '#f8f8f7', borderRadius: '12px' }}>
+        <div style={{ fontSize: '11px', color: '#a09e9a', marginBottom: '10px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Warum die meisten zu viel bezahlen
         </div>
         {[
@@ -85,11 +85,9 @@ function LandingPage({ onStart }) {
         ].map(({ x, text }, i) => (
           <div key={i} style={{
             display: 'flex', gap: '10px', fontSize: '13px',
-            color: '#6b6966', padding: '4px 0', alignItems: 'flex-start'
+            color: '#6b6966', padding: '3px 0', alignItems: 'flex-start'
           }}>
-            <span style={{ color: x ? '#E24B4A' : '#1D9E75', flexShrink: 0, marginTop: '1px' }}>
-              {x ? '✕' : '✓'}
-            </span>
+            <span style={{ color: x ? '#E24B4A' : '#1D9E75', flexShrink: 0 }}>{x ? '✕' : '✓'}</span>
             <span>{text}</span>
           </div>
         ))}
@@ -111,41 +109,52 @@ export default function App() {
     alert('Info-PDF kommt gleich — wird noch implementiert!')
   }
 
+  // Padding je nach Ansicht
+  const mainPadding = ansicht === ANSICHTEN.START ? '0' : '1.25rem 0 3rem'
+
   return (
     <div style={{ minHeight: '100vh', background: '#fff' }}>
       <Nav onLogo={neustart} />
-      <main style={{ padding: '2rem 0 4rem' }}>
+      <main style={{ padding: mainPadding }}>
         {ansicht === ANSICHTEN.START && (
           <LandingPage onStart={() => setAnsicht(ANSICHTEN.KONFIGURATOR)} />
         )}
         {ansicht === ANSICHTEN.KONFIGURATOR && (
-          <Konfigurator
-            onFertig={({ antworten, ergebnis }) => {
-              setDaten(prev => ({ ...prev, antworten, ergebnis }))
-              setAnsicht(ANSICHTEN.ERGEBNIS)
-            }}
-          />
+          <div style={{ padding: '1.25rem 0 3rem' }}>
+            <Konfigurator
+              onFertig={({ antworten, ergebnis }) => {
+                setDaten(prev => ({ ...prev, antworten, ergebnis }))
+                setAnsicht(ANSICHTEN.ERGEBNIS)
+              }}
+            />
+          </div>
         )}
         {ansicht === ANSICHTEN.ERGEBNIS && (
-          <Ergebnis
-            ergebnis={daten.ergebnis}
-            onAngebot={() => setAnsicht(ANSICHTEN.LEAD)}
-            onPdfDownload={handlePdfDownload}
-            onNeustart={neustart}
-          />
+          <div style={{ padding: '1.25rem 0 3rem' }}>
+            <Ergebnis
+              ergebnis={daten.ergebnis}
+              onAngebot={() => setAnsicht(ANSICHTEN.LEAD)}
+              onPdfDownload={handlePdfDownload}
+              onNeustart={neustart}
+            />
+          </div>
         )}
         {ansicht === ANSICHTEN.LEAD && (
-          <LeadForm
-            ergebnis={daten.ergebnis}
-            antworten={daten.antworten}
-            onErfolg={kontakt => {
-              setDaten(prev => ({ ...prev, kontakt }))
-              setAnsicht(ANSICHTEN.DANKE)
-            }}
-          />
+          <div style={{ padding: '1.25rem 0 3rem' }}>
+            <LeadForm
+              ergebnis={daten.ergebnis}
+              antworten={daten.antworten}
+              onErfolg={kontakt => {
+                setDaten(prev => ({ ...prev, kontakt }))
+                setAnsicht(ANSICHTEN.DANKE)
+              }}
+            />
+          </div>
         )}
         {ansicht === ANSICHTEN.DANKE && (
-          <Danke kontakt={daten.kontakt} onNeustart={neustart} />
+          <div style={{ padding: '1.25rem 0 3rem' }}>
+            <Danke kontakt={daten.kontakt} onNeustart={neustart} />
+          </div>
         )}
       </main>
     </div>
