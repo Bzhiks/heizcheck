@@ -4,18 +4,18 @@ import { berechneWirtschaftlichkeit } from '../utils/berechnung.js'
 
 function BlockHeader({ nummer, titel, aktiv, fertig }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
       <div style={{
-        width: '22px', height: '22px', borderRadius: '50%',
+        width: '20px', height: '20px', borderRadius: '50%',
         background: fertig ? '#1D9E75' : aktiv ? '#0a0a0a' : '#e2e1de',
         color: fertig || aktiv ? '#fff' : '#a09e9a',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '11px', fontWeight: 500, flexShrink: 0, transition: 'all 0.3s ease'
+        fontSize: '10px', fontWeight: 500, flexShrink: 0, transition: 'all 0.3s ease'
       }}>
         {fertig ? '✓' : nummer}
       </div>
       <span style={{
-        fontSize: '11px', fontWeight: 500, letterSpacing: '0.06em',
+        fontSize: '10px', fontWeight: 500, letterSpacing: '0.05em',
         textTransform: 'uppercase', whiteSpace: 'nowrap',
         color: fertig ? '#1D9E75' : aktiv ? '#0a0a0a' : '#a09e9a',
         transition: 'color 0.3s ease'
@@ -133,18 +133,24 @@ export default function Konfigurator({ onFertig }) {
       transition: 'opacity 0.2s ease, transform 0.2s ease'
     }}>
 
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* Block-Header — alle in einer Zeile */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        marginBottom: '1rem', flexWrap: 'nowrap'
+      }}>
         <BlockHeader nummer="1" titel="Dein Haus" aktiv={aktuellerBlock === 1} fertig={aktuellerBlock > 1} />
-        <span style={{ color: '#e2e1de', fontSize: '12px' }}>—</span>
-        <BlockHeader nummer="2" titel="Deine Technik" aktiv={aktuellerBlock === 2} fertig={aktuellerBlock > 2} />
-        <span style={{ color: '#e2e1de', fontSize: '12px' }}>—</span>
-        <BlockHeader nummer="3" titel="Deine Situation" aktiv={aktuellerBlock === 3} fertig={false} />
+        <span style={{ color: '#e2e1de', fontSize: '10px', flexShrink: 0 }}>—</span>
+        <BlockHeader nummer="2" titel="Technik" aktiv={aktuellerBlock === 2} fertig={aktuellerBlock > 2} />
+        <span style={{ color: '#e2e1de', fontSize: '10px', flexShrink: 0 }}>—</span>
+        <BlockHeader nummer="3" titel="Situation" aktiv={aktuellerBlock === 3} fertig={false} />
       </div>
 
-      <div style={{ height: '3px', background: '#e2e1de', borderRadius: '2px', marginBottom: '2rem', overflow: 'hidden' }}>
+      {/* Progress */}
+      <div style={{ height: '3px', background: '#e2e1de', borderRadius: '2px', marginBottom: '1.5rem', overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${fortschritt}%`, background: '#1D9E75', borderRadius: '2px', transition: 'width 0.3s ease' }} />
       </div>
 
+      {/* Frage */}
       <h2 style={{
         fontSize: 'clamp(20px, 4vw, 26px)', fontWeight: 500,
         lineHeight: 1.2, marginBottom: '0.75rem',
@@ -153,18 +159,20 @@ export default function Konfigurator({ onFertig }) {
         {aktuell.frage}
       </h2>
 
+      {/* Info */}
       {aktuell.info && (
         <p style={{
           fontSize: '13px', color: '#6b6966', lineHeight: 1.6,
-          marginBottom: '1.5rem', padding: '10px 14px',
+          marginBottom: '1rem', padding: '10px 14px',
           background: '#f8f8f7', borderRadius: '8px', borderLeft: '3px solid #1D9E75'
         }}>
           {aktuell.info}
         </p>
       )}
 
-      <div style={{ height: aktuell.info ? 0 : '1.25rem' }} />
+      {!aktuell.info && <div style={{ height: '0.75rem' }} />}
 
+      {/* Optionen */}
       {aktuell.typ === 'auswahl' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {aktuell.optionen.map(opt => (
@@ -178,6 +186,7 @@ export default function Konfigurator({ onFertig }) {
         </div>
       )}
 
+      {/* Eingabe */}
       {aktuell.typ === 'eingabe' && (
         <div>
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -226,7 +235,7 @@ export default function Konfigurator({ onFertig }) {
               setTimeout(() => weiter(neu), 150)
             }}
             style={{
-              marginTop: '12px', background: 'none', border: 'none',
+              marginTop: '10px', background: 'none', border: 'none',
               fontSize: '13px', color: '#a09e9a', cursor: 'pointer',
               textDecoration: 'underline', fontFamily: "'DM Sans', sans-serif"
             }}
@@ -235,19 +244,17 @@ export default function Konfigurator({ onFertig }) {
           </button>
 
           {aktuell.tipp && (
-            <p style={{ fontSize: '12px', color: '#a09e9a', marginTop: '8px', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '12px', color: '#a09e9a', marginTop: '6px', lineHeight: 1.5 }}>
               {aktuell.tipp}
             </p>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
             <button onClick={zurueck} style={{
               background: 'none', border: 'none', fontSize: '14px',
               color: '#a09e9a', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
               visibility: schritt === 0 ? 'hidden' : 'visible'
-            }}>
-              ← Zurück
-            </button>
+            }}>← Zurück</button>
             <span style={{ fontSize: '12px', color: '#a09e9a' }}>{schritt + 1} / {schritte.length}</span>
             <button
               onClick={naechsterEingabe}
@@ -267,17 +274,16 @@ export default function Konfigurator({ onFertig }) {
         </div>
       )}
 
+      {/* Nav bei Auswahl */}
       {aktuell.typ === 'auswahl' && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
           <button onClick={zurueck} style={{
             background: 'none', border: 'none', fontSize: '14px',
             color: '#a09e9a', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
             visibility: schritt === 0 ? 'hidden' : 'visible'
-          }}>
-            ← Zurück
-          </button>
+          }}>← Zurück</button>
           <span style={{ fontSize: '12px', color: '#a09e9a' }}>{schritt + 1} / {schritte.length}</span>
-          <div style={{ width: '80px' }} />
+          <div style={{ width: '70px' }} />
         </div>
       )}
     </div>
