@@ -1,29 +1,39 @@
 import React, { useState } from 'react'
-import ProgressBar from './ProgressBar.jsx'
-import { SCHRITTE, KAMIN_FOLGE } from '../utils/schritte.js'
+import { gefilterteSchritte } from '../utils/schritte.js'
 import { berechneWirtschaftlichkeit } from '../utils/berechnung.js'
 
-const btn = {
-  base: {
-    width: '100%',
-    padding: '14px 18px',
-    border: '1px solid #e2e1de',
-    borderRadius: '12px',
-    background: '#ffffff',
-    cursor: 'pointer',
-    fontSize: '15px',
-    color: '#0a0a0a',
-    textAlign: 'left',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    transition: 'all 0.15s ease',
-    fontFamily: "'DM Sans', sans-serif"
-  },
-  selected: {
-    borderColor: '#0a0a0a',
-    background: '#f8f8f7'
-  }
+function BlockHeader({ nummer, titel, aktiv, fertig }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{
+        width: '22px',
+        height: '22px',
+        borderRadius: '50%',
+        background: fertig ? '#1D9E75' : aktiv ? '#0a0a0a' : '#e2e1de',
+        color: fertig || aktiv ? '#fff' : '#a09e9a',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '11px',
+        fontWeight: 500,
+        flexShrink: 0,
+        transition: 'all 0.3s ease'
+      }}>
+        {fertig ? '✓' : nummer}
+      </div>
+      <span style={{
+        fontSize: '11px',
+        fontWeight: 500,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        color: fertig ? '#1D9E75' : aktiv ? '#0a0a0a' : '#a09e9a',
+        transition: 'color 0.3s ease',
+        whiteSpace: 'nowrap'
+      }}>
+        {titel}
+      </span>
+    </div>
+  )
 }
 
 function OptionButton({ option, ausgewaehlt, onClick }) {
@@ -34,17 +44,29 @@ function OptionButton({ option, ausgewaehlt, onClick }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
-        ...btn.base,
-        ...(ausgewaehlt ? btn.selected : {}),
-        ...(hover && !ausgewaehlt ? { borderColor: '#a09e9a', background: '#f8f8f7' } : {})
+        width: '100%',
+        padding: '14px 18px',
+        border: ausgewaehlt ? '1.5px solid #0a0a0a' : hover ? '1px solid #a09e9a' : '1px solid #e2e1de',
+        borderRadius: '12px',
+        background: ausgewaehlt ? '#f8f8f7' : hover ? '#f8f8f7' : '#fff',
+        cursor: 'pointer',
+        textAlign: 'left',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        transition: 'all 0.15s ease',
+        fontFamily: "'DM Sans', sans-serif"
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {option.icon && <span style={{ fontSize: '20px' }}>{option.icon}</span>}
+        {option.img && <span style={{ fontSize: '16px' }}>{option.img}</span>}
         <div>
-          <div style={{ fontWeight: ausgewaehlt ? 500 : 400 }}>{option.label}</div>
+          <div style={{ fontSize: '15px', fontWeight: ausgewaehlt ? 500 : 400, color: '#0a0a0a' }}>
+            {option.label}
+          </div>
           {option.sub && (
-            <div style={{ fontSize: '12px', color: ausgewaehlt ? '#6b6966' : '#a09e9a', marginTop: '2px' }}>
+            <div style={{ fontSize: '12px', color: '#a09e9a', marginTop: '2px' }}>
               {option.sub}
             </div>
           )}
@@ -63,21 +85,23 @@ function OptionButton({ option, ausgewaehlt, onClick }) {
 }
 
 export default function Konfigurator({ onFertig }) {
-  const [schritt, setSchritt] = useState(0)
   const [antworten, setAntworten] = useState({})
   const [eingabe, setEingabe] = useState('')
+  const [schritt, setSchritt] = useState(0)
   const [animate, setAnimate] = useState(true)
 
-  const alleSchritte = [...SCHRITTE]
-  if (antworten.kamin === 'ja') {
-    const kaminIdx = alleSchritte.findIndex(s => s.id === 'kamin')
-    alleSchritte.splice(kaminIdx + 1, 0, KAMIN_FOLGE)
-  }
+  const schritte = gefilterteSchritte(antworten)
+  const aktuell = schritte[schritt]
+  const istLetzter = schritt === schritte.length - 1
 
-  const aktuell = alleSchritte[schritt]
-  const istLetzter = schritt === alleSchritte.length - 1
+  const block1Schritte = schritte.filter(s => s.block === 1).length
+  const block2Schritte = schritte.filter(s => s.block === 2).length
+  const block1Ende = block1Schritte - 1
+  const block2Ende = block1Schritte + block2Schritte - 1
+  const aktuellerBlock = schritt <= block1Ende ? 1 : schritt <= block2Ende ? 2 : 3
+
   const kannWeiter = aktuell?.typ === 'eingabe'
-    ? (eingabe !== '' || antworten[aktuell.id] === 'default')
+    ? (eingabe !== '' || antworten[aktuell?.id] === 'default')
     : !!antworten[aktuell?.id]
 
   function naechster() {
@@ -85,18 +109,16 @@ export default function Konfigurator({ onFertig }) {
       setAntworten(prev => ({ ...prev, [aktuell.id]: eingabe }))
     }
     if (istLetzter) {
-      const finalAntworten = { ...antworten }
-      if (aktuell.typ === 'eingabe' && eingabe !== '') {
-        finalAntworten[aktuell.id] = eingabe
-      }
-      const ergebnis = berechneWirtschaftlichkeit(finalAntworten)
-      onFertig({ antworten: finalAntworten, ergebnis })
+      const final = { ...antworten }
+      if (aktuell.typ === 'eingabe' && eingabe !== '') final[aktuell.id] = eingabe
+      const ergebnis = berechneWirtschaftlichkeit(final)
+      onFertig({ antworten: final, ergebnis })
       return
     }
     setAnimate(false)
     setTimeout(() => {
       setSchritt(s => s + 1)
-      setEingabe(antworten[alleSchritte[schritt + 1]?.id] || '')
+      setEingabe(antworten[schritte[schritt + 1]?.id] || '')
       setAnimate(true)
     }, 120)
   }
@@ -106,47 +128,87 @@ export default function Konfigurator({ onFertig }) {
     setAnimate(false)
     setTimeout(() => {
       setSchritt(s => s - 1)
-      setEingabe(antworten[alleSchritte[schritt - 1]?.id] || '')
+      setEingabe(antworten[schritte[schritt - 1]?.id] || '')
       setAnimate(true)
     }, 120)
   }
 
-  function waehleOption(id, wert) {
-    setAntworten(prev => ({ ...prev, [id]: wert }))
-  }
-
-  function setzeDefault() {
-    setAntworten(prev => ({ ...prev, [aktuell.id]: 'default' }))
-    setEingabe('')
-  }
-
   if (!aktuell) return null
+
+  const fortschritt = ((schritt + 1) / schritte.length) * 100
 
   return (
     <div style={{
-      maxWidth: '480px',
+      maxWidth: '520px',
       margin: '0 auto',
       padding: '0 1rem',
       opacity: animate ? 1 : 0,
       transform: animate ? 'translateY(0)' : 'translateY(8px)',
       transition: 'opacity 0.2s ease, transform 0.2s ease'
     }}>
-      <ProgressBar aktuell={schritt} gesamt={alleSchritte.length} />
+
+      {/* Block-Indicator */}
+      <div style={{
+        display: 'flex',
+        gap: '20px',
+        marginBottom: '1.5rem',
+        flexWrap: 'wrap'
+      }}>
+        <BlockHeader nummer="1" titel="Dein Haus" aktiv={aktuellerBlock === 1} fertig={aktuellerBlock > 1} />
+        <div style={{ color: '#e2e1de', alignSelf: 'center' }}>—</div>
+        <BlockHeader nummer="2" titel="Deine Technik" aktiv={aktuellerBlock === 2} fertig={aktuellerBlock > 2} />
+        <div style={{ color: '#e2e1de', alignSelf: 'center' }}>—</div>
+        <BlockHeader nummer="3" titel="Deine Situation" aktiv={aktuellerBlock === 3} fertig={false} />
+      </div>
+
+      {/* Progress Bar */}
+      <div style={{
+        height: '3px',
+        background: '#e2e1de',
+        borderRadius: '2px',
+        marginBottom: '2rem',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          height: '100%',
+          width: `${fortschritt}%`,
+          background: '#1D9E75',
+          borderRadius: '2px',
+          transition: 'width 0.3s ease'
+        }} />
+      </div>
+
+      {/* Frage */}
       <h2 style={{
-        fontSize: 'clamp(22px, 4vw, 28px)',
+        fontSize: 'clamp(20px, 4vw, 26px)',
         fontWeight: 500,
         lineHeight: 1.2,
-        marginBottom: '0.5rem',
-        letterSpacing: '-0.3px'
+        marginBottom: '0.75rem',
+        letterSpacing: '-0.3px',
+        color: '#0a0a0a'
       }}>
         {aktuell.frage}
       </h2>
+
+      {/* Info */}
       {aktuell.info && (
-        <p style={{ fontSize: '13px', color: '#a09e9a', marginBottom: '1.5rem' }}>
+        <p style={{
+          fontSize: '13px',
+          color: '#6b6966',
+          lineHeight: 1.6,
+          marginBottom: '1.5rem',
+          padding: '10px 14px',
+          background: '#f8f8f7',
+          borderRadius: '8px',
+          borderLeft: '3px solid #1D9E75'
+        }}>
           {aktuell.info}
         </p>
       )}
-      <div style={{ height: aktuell.info ? 0 : '1.5rem' }} />
+
+      <div style={{ height: aktuell.info ? 0 : '1.25rem' }} />
+
+      {/* Optionen */}
       {aktuell.typ === 'auswahl' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {aktuell.optionen.map(opt => (
@@ -154,14 +216,16 @@ export default function Konfigurator({ onFertig }) {
               key={opt.wert}
               option={opt}
               ausgewaehlt={antworten[aktuell.id] === opt.wert}
-              onClick={() => waehleOption(aktuell.id, opt.wert)}
+              onClick={() => setAntworten(prev => ({ ...prev, [aktuell.id]: opt.wert }))}
             />
           ))}
         </div>
       )}
+
+      {/* Eingabe */}
       {aktuell.typ === 'eingabe' && (
         <div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
             <input
               type="number"
               value={eingabe}
@@ -179,7 +243,7 @@ export default function Konfigurator({ onFertig }) {
                 color: '#0a0a0a',
                 background: '#fff',
                 fontFamily: "'DM Sans', sans-serif",
-                transition: 'border-color 0.15s'
+                outline: 'none'
               }}
               onFocus={e => e.target.style.borderColor = '#0a0a0a'}
               onBlur={e => e.target.style.borderColor = '#e2e1de'}
@@ -191,13 +255,14 @@ export default function Konfigurator({ onFertig }) {
               fontSize: '13px',
               color: '#a09e9a',
               background: '#f8f8f7',
-              whiteSpace: 'nowrap',
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              whiteSpace: 'nowrap'
             }}>
               {aktuell.einheit}
             </div>
           </div>
+
           {antworten[aktuell.id] === 'default' && (
             <div style={{
               marginTop: '10px',
@@ -207,26 +272,29 @@ export default function Konfigurator({ onFertig }) {
               fontSize: '13px',
               color: '#085041'
             }}>
-              ✓ Wir verwenden den Durchschnittswert (20.000 kWh/Jahr)
+              ✓ Wir verwenden 20.000 kWh/Jahr als Durchschnitt
             </div>
           )}
+
           <button
-            onClick={setzeDefault}
+            onClick={() => {
+              setAntworten(prev => ({ ...prev, [aktuell.id]: 'default' }))
+              setEingabe('')
+            }}
             style={{
               marginTop: '12px',
               background: 'none',
               border: 'none',
-              padding: 0,
               fontSize: '13px',
               color: '#a09e9a',
               cursor: 'pointer',
               textDecoration: 'underline',
-              textDecorationColor: '#e2e1de',
               fontFamily: "'DM Sans', sans-serif"
             }}
           >
             {aktuell.tippAktion}
           </button>
+
           {aktuell.tipp && (
             <p style={{ fontSize: '12px', color: '#a09e9a', marginTop: '8px', lineHeight: 1.5 }}>
               {aktuell.tipp}
@@ -234,6 +302,8 @@ export default function Konfigurator({ onFertig }) {
           )}
         </div>
       )}
+
+      {/* Navigation */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -247,20 +317,25 @@ export default function Konfigurator({ onFertig }) {
             border: 'none',
             fontSize: '14px',
             color: '#a09e9a',
-            padding: '8px 0',
+            cursor: 'pointer',
             fontFamily: "'DM Sans', sans-serif",
             visibility: schritt === 0 ? 'hidden' : 'visible'
           }}
         >
           ← Zurück
         </button>
+
+        <span style={{ fontSize: '12px', color: '#a09e9a' }}>
+          {schritt + 1} / {schritte.length}
+        </span>
+
         <button
           onClick={naechster}
           disabled={!kannWeiter}
           style={{
-            padding: '13px 32px',
+            padding: '13px 28px',
             background: kannWeiter ? '#0a0a0a' : '#e2e1de',
-            color: kannWeiter ? '#ffffff' : '#a09e9a',
+            color: kannWeiter ? '#fff' : '#a09e9a',
             border: 'none',
             borderRadius: '12px',
             fontSize: '15px',
@@ -270,7 +345,7 @@ export default function Konfigurator({ onFertig }) {
             transition: 'all 0.15s ease'
           }}
         >
-          {istLetzter ? 'Einschätzung anzeigen →' : 'Weiter'}
+          {istLetzter ? 'Mein Ergebnis →' : 'Weiter'}
         </button>
       </div>
     </div>
