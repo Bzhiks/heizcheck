@@ -84,7 +84,7 @@ function LandingPage({ onStart, isMobile }) {
   return (
     <div style={{
       maxWidth: '1140px', margin: '0 auto',
-      padding: isMobile ? '2rem 1.25rem 3rem' : '3.5rem 48px 4rem'
+      padding: isMobile ? '2rem 1.25rem 3rem' : '3.5rem 80px 4rem'
     }}>
 
       <div style={{
