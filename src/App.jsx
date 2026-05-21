@@ -107,7 +107,7 @@ function LandingPage({ onStart, isMobile }) {
           </div>
 
           <h1 style={{
-            fontSize: isMobile ? 'clamp(26px, 5vw, 36px)' : '40px',
+            fontSize: isMobile ? 'clamp(26px, 5vw, 36px)' : '52px',
             fontWeight: 500, lineHeight: 1.12,
             letterSpacing: '-0.5px', marginBottom: '1rem', color: '#0a0a0a'
           }}>
@@ -125,7 +125,7 @@ function LandingPage({ onStart, isMobile }) {
           </p>
 
           <button onClick={onStart} style={{
-            padding: '16px 36px', background: '#0a0a0a', color: '#fff',
+            padding: '18px 48px', background: '#0a0a0a', color: '#fff',
             border: 'none', borderRadius: '12px', fontSize: '16px',
             fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
             marginBottom: '2rem', display: 'block',
