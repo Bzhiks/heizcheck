@@ -20,7 +20,7 @@ function Nav({ onLogo }) {
         heiz<span style={{ color: '#1D9E75' }}>check</span>
       </button>
       <div style={{ fontSize: '13px', color: '#a09e9a' }}>
-        Kostenlos · Kein Spam · 3 Minuten
+        3 Schritte · 3 Minuten · Kostenlos
       </div>
     </nav>
   )
