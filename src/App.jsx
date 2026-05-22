@@ -120,8 +120,8 @@ function LandingPage({ onStart, isMobile }) {
             fontSize: '16px', color: '#6b6966', lineHeight: 1.65,
             marginBottom: '2rem', maxWidth: '440px'
           }}>
-            Kein Anruf, kein Druck, kein Verkaufsgespräch. 15 kurze Fragen — du bekommst
-            Kosten, Förderung und Ersparnis konkret für deine Situation.
+          Kein Anruf, kein Druck. In 3 Schritten zu deiner persönlichen Wirtschaftlichkeitsberechnung — mit Förderung, 
+          Ersparnis und konkreter Investitionshöhe.
           </p>
 
           <button onClick={onStart} style={{
@@ -153,7 +153,7 @@ function LandingPage({ onStart, isMobile }) {
         padding: '24px 28px', background: '#f8f8f7', borderRadius: '16px'
       }}>
         <div style={{ fontSize: '11px', color: '#a09e9a', marginBottom: '12px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Warum die meisten zu viel bezahlen
+          4 GRÜNDE WARUM KUNDEN HEIZCHECK BEVORZUGEN
         </div>
         <div style={{
           display: 'grid',
@@ -161,10 +161,10 @@ function LandingPage({ onStart, isMobile }) {
           gap: '4px'
         }}>
           {[
-            { x: true,  text: '10 Firmen rufen an — niemand erklärt ehrlich was es kostet' },
-            { x: true,  text: 'Angebote nicht vergleichbar — jeder rechnet anders' },
-            { x: true,  text: 'Förderung wird falsch oder gar nicht berücksichtigt' },
-            { x: false, text: 'Heizcheck gibt dir zuerst Klarheit — dann entscheidest du selbst' },
+            { x: false, text: '✓ Klare Investitionshöhe mit Förderung und Ersparnis — sofort, ohne Anruf' },
+{ x: false, text: '✓ Keine 10 Firmen die gleichzeitig anrufen — du entscheidest wer dich kontaktiert' },
+{ x: false, text: '✓ Erst Klarheit, dann Entscheidung — nie umgekehrt' },
+{ x: false, text: '✓ Alle Informationen für eine fundierte Entscheidung' },
           ].map(({ x, text }, i) => (
             <div key={i} style={{
               display: 'flex', gap: '10px', fontSize: '13px',
