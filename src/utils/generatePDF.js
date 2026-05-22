@@ -97,7 +97,7 @@ function buildPDF(doc, ergebnis, antworten, kontakt) {
   const colW = INHALT / 3 - 2
   const cols = [
     { label: 'Gasheizung', wert: fmt(ergebnis.altKosten), farbe: ROT, bg: [252, 235, 235], pro: ['Steigende Preise', 'Energieabhaengig', 'Hohe Wartung'], plus: false },
-    { label: 'Waermepumpe', wert: fmt(ergebnis.wpKosten), farbe: GRUEN, bg: GRAU_HELL, pro: ['Deutlich guenstiger', 'Unabhaengig', 'Niedrige Wartung'], plus: true },
+    { label: 'Wärmepumpe', wert: fmt(ergebnis.wpKosten), farbe: GRUEN, bg: GRAU_HELL, pro: ['Deutlich günstiger', 'Unabhaengig', 'Niedrige Wartung'], plus: true },
     { label: 'WP + Energiemgmt.', wert: fmt(Math.round(ergebnis.wpKosten * 0.8)), farbe: GRUEN_DUNKEL, bg: GRUEN_HELL, pro: ['Maximum Ersparnis', 'Automatisch optimiert', 'Zukunftsorientiert'], plus: true },
   ]
   cols.forEach((col, i) => {
@@ -131,12 +131,12 @@ function buildPDF(doc, ergebnis, antworten, kontakt) {
   doc.setFontSize(7)
   doc.setTextColor(...GRAU_LEICHT)
   doc.setFont('helvetica', 'normal')
-  doc.text('KOSTEN UEBER 20 JAHRE (3% PREISSTEIGERUNG P.A.)', RAND, y + 4)
+  doc.text('KOSTEN ÜBER 20 JAHRE (3% PREISSTEIGERUNG P.A.)', RAND, y + 4)
   y += 8
 
   const jahre20 = [
     { label: 'Gasheizung', wert: Math.round(ergebnis.altKosten * 26.87), farbe: ROT, breite: 1.0 },
-    { label: 'Waermepumpe', wert: Math.round(ergebnis.wpKosten * 26.87), farbe: GRUEN, breite: ergebnis.wpKosten / ergebnis.altKosten },
+    { label: 'Wärmepumpe', wert: Math.round(ergebnis.wpKosten * 26.87), farbe: GRUEN, breite: ergebnis.wpKosten / ergebnis.altKosten },
     { label: 'WP + Energiemanagement', wert: Math.round(ergebnis.wpKosten * 0.8 * 26.87), farbe: GRUEN_DUNKEL, breite: (ergebnis.wpKosten * 0.8) / ergebnis.altKosten },
   ]
   jahre20.forEach(item => {
@@ -161,7 +161,7 @@ function buildPDF(doc, ergebnis, antworten, kontakt) {
   doc.setFontSize(10)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(...SCHWARZ)
-  doc.text('Jede Heizperiode ohne Waermepumpe bedeutet ' + fmt(ergebnis.altKosten), RAND, y + 5)
+  doc.text('Jede Heizperiode ohne Wärmepumpe bedeutet ' + fmt(ergebnis.altKosten), RAND, y + 5)
   doc.setFontSize(8)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(...GRAU_TEXT)
@@ -196,11 +196,11 @@ function buildPDF(doc, ergebnis, antworten, kontakt) {
   doc.setFontSize(7)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(...GRAU_LEICHT)
-  doc.text('INVESTITIONSUEBERSICHT', RAND, y + 4)
+  doc.text('INVESTITIONSÜBERSICHT', RAND, y + 4)
   y += 8
   const invRows = [
     { label: 'Anlage inkl. Installation (Richtwert)', wert: fmt(ergebnis.anlagenPreis), farbe: GRAU_TEXT },
-    { label: 'KfW-Foerderung BEG (' + ergebnis.foerderProzent + '%)', wert: '- ' + fmt(ergebnis.foerderBetrag), farbe: GRUEN },
+    { label: 'KfW-Förderung BEG (' + ergebnis.foerderProzent + '%)', wert: '- ' + fmt(ergebnis.foerderBetrag), farbe: GRUEN },
   ]
   invRows.forEach(row => {
     doc.setFontSize(8)
@@ -232,11 +232,11 @@ function buildPDF(doc, ergebnis, antworten, kontakt) {
   y += 8
 
   const tipps = [
-    ['Konzept schlaegt Preis', 'Die monatlichen Betriebskosten zaehlen mehr als die einmalige Investition. Eine guenstig gekaufte Anlage mit schlechtem Konzept kann 20% mehr Strom verbrauchen.'],
-    ['Pufferspeicher korrekt dimensionieren', 'Schuetzt den Kompressor, verbessert den Ruecklauf und ermoeglicht es teure Stromzeiten zu ueberbruecken. Senkt Betriebskosten und verlaengert die Lebensdauer.'],
-    ['Energiemanagement anfragen', 'Frag jeden Anbieter ob er mit einem Energiemanagementsystem arbeitet und vorhandene Komponenten wie Solar oder Speicher eingebunden werden koennen.'],
-    ['Heizlastberechnung ist Pflicht', 'Sie zeigt wie sich deine Heizkoerper und Fussbodenheizung bei -9 Grad verhalten. So laeuft die Anlage auch im haertesten Winter zuverlaessig.'],
-    ['Angebote wirklich vergleichen', 'Achte auf das Rundum-Paket: Konzept, aufeinander abgestimmte Komponenten und eine Planung fuer die naechsten mindestens 20 Jahre.'],
+    ['Konzept schlaegt Preis', 'Die monatlichen Betriebskosten zählen mehr als die einmalige Investition. Eine günstig gekaufte Anlage mit schlechtem Konzept kann 20% mehr Strom verbrauchen.'],
+    ['Pufferspeicher korrekt dimensionieren', 'Schützt den Kompressor, verbessert den Rücklauf und ermoeglicht es teure Stromzeiten zu überbrücken. Senkt Betriebskosten und verlängert die Lebensdauer.'],
+    ['Energiemanagement anfragen', 'Frag jeden Anbieter ob er mit einem Energiemanagementsystem arbeitet und vorhandene Komponenten wie Solar oder Speicher eingebunden werden können.'],
+    ['Heizlastberechnung ist Pflicht', 'Sie zeigt wie sich deine Heizkörper und Fußbodenheizung bei -9 Grad verhalten. So laeuft die Anlage auch im haertesten Winter zuverlässig.'],
+    ['Angebote wirklich vergleichen', 'Achte auf das Rundum-Paket: Konzept, aufeinander abgestimmte Komponenten und eine Planung für die nächsten mindestens 20 Jahre.'],
   ]
   tipps.forEach((tipp, i) => {
     doc.setFillColor(...SCHWARZ)
@@ -303,6 +303,6 @@ function buildPDF(doc, ergebnis, antworten, kontakt) {
   doc.setFontSize(7)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(120, 120, 120)
-  doc.text('heizcheck.pro · Persoenlicher Waermepumpen-Report', RAND, pageH - 5)
+  doc.text('heizcheck.pro · Persönlicher Wärmepumpen-Report', RAND, pageH - 5)
   doc.text('Richtwerte · 95% Angebotsgenauigkeit', W - RAND, pageH - 5, { align: 'right' })
 }
