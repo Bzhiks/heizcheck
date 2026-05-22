@@ -3,6 +3,7 @@ import Konfigurator from './components/Konfigurator.jsx'
 import Ergebnis from './components/Ergebnis.jsx'
 import LeadForm from './components/LeadForm.jsx'
 import Danke from './components/Danke.jsx'
+import { generateInfoPDF, generatePersonalPDF } from './utils/generatePDF.js'
 
 const ANSICHTEN = { START: 'start', KONFIGURATOR: 'konfigurator', ERGEBNIS: 'ergebnis', LEAD: 'lead', DANKE: 'danke' }
 
