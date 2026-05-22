@@ -198,7 +198,7 @@ export default function App() {
   }
 
   function handlePdfDownload() {
-    alert('Info-PDF kommt gleich — wird noch implementiert!')
+    generateInfoPDF(daten.ergebnis, daten.antworten)
   }
 
   return (
