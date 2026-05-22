@@ -228,6 +228,7 @@ function buildPDF(doc, ergebnis, antworten, kontakt) {
   doc.setFontSize(7)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(...GRAU_LEICHT)
+  if (y > 190) { doc.addPage(); y = 14; }
   doc.text('5 TIPPS — SO HOLEN SIE DAS MAXIMUM RAUS', RAND, y + 4)
   y += 8
 
