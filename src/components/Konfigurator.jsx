@@ -167,7 +167,7 @@ function LiveReport({ antworten, schritt, schritte }) {
   const block2Ende = block1Ende + schritte.filter(s => s.block === 2).length
   const block1Fertig = schritt > block1Ende
   const block2Fertig = schritt > block2Ende
-  const ergebnis = block2Fertig ? berechneWirtschaftlichkeit(antworten) : null
+  const ergebnis = schritt >= schritte.length - 1 ? berechneWirtschaftlichkeit(antworten) : null
   const heizLabel = { gas: 'Gasheizung', oel: 'Ölheizung', pellets: 'Pelletheizung', strom: 'Stromheizung', fernwaerme: 'Fernwärme' }
   const heizflLabel = { fub: 'Fußbodenheizung', mix: 'Gemischt', hk: 'Heizkörper' }
   const bauLabel = { vor1970: 'Vor 1970', '1970-1990': '1970–1990', '1990-2010': '1990–2010', nach2010: 'Nach 2010' }
