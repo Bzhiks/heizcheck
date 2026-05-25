@@ -1,73 +1,101 @@
-export const MARKTPREISE = {
-  gas: 0.11,
-  oel: 1.42,
-  pellets: 0.065,
-  strom: 0.28,
-  fernwaerme: 0.14
+const WP_PREISE = {
+  '5kw':  31500,
+  '7kw':  32100,
+  '10kw': 34670,
+  '12kw': 37560,
 }
 
-export const STANDARD_VERBRAUCH = 20000
-
-export const COP_FAKTOREN = {
-  fub: 4.2,
-  mix: 3.6,
-  hk: 3.0
+const MARKTPREISE = {
+  gas:        0.11,
+  oel:        0.10,
+  pellets:    0.065,
+  strom:      0.28,
+  fernwaerme: 0.14,
 }
 
-const VERLUST = 0.12
-const FOERDERUNG_BASIS = 0.35
-const FOERDERUNG_EINKOMMEN = 0.70
-const ANLAGEN_PREIS = 20000
-const STROMPREIS_WP = 0.26
+const STROMPREIS_WP   = 0.26
 const PREISSTEIGERUNG = 0.03
 
-export function berechneWirtschaftlichkeit(antworten) {
-  const { heizungsart, verbrauch, heizflaeche, einkommen, eigentuemer, pv } = antworten
+const COP = {
+  fub: 4.5,
+  mix: 4.0,
+  hk:  4.0,
+}
 
-  const verbrauchKwh = verbrauch === 'default' || !verbrauch
-    ? STANDARD_VERBRAUCH
-    : parseFloat(verbrauch)
+function getWpGroesse(kwh) {
+  if (kwh <= 20000) return '5kw'
+  if (kwh <= 25000) return '7kw'
+  if (kwh <= 32000) return '10kw'
+  return '12kw'
+}
 
-  let altKosten = 0
-  if (heizungsart === 'oel') {
-    altKosten = (verbrauchKwh / 10) * MARKTPREISE.oel
-  } else {
-    altKosten = verbrauchKwh * (MARKTPREISE[heizungsart] || 0.11)
+function berechneForoerderung(antworten, anlagenPreis) {
+  const { heizungsart, heizungsalter, eigentuemer, einkommen } = antworten
+  const istEigentuemer  = eigentuemer === 'ja'
+  const einkommensBonus = einkommen === 'ja'
+
+  if (!istEigentuemer) {
+    return { prozent: 15, betrag: Math.round(anlagenPreis * 0.15) }
   }
 
-  const cop = COP_FAKTOREN[heizflaeche] || 3.5
-  const wpVerbrauch = (verbrauchKwh / cop) * (1 + VERLUST)
-  const wpKosten = wpVerbrauch * STROMPREIS_WP
+  let prozent = 35
 
-  const hatEinkommensbonus = einkommen === 'ja'
-  const istEigentuemer = eigentuemer === 'ja'
-  const foerderProzent = hatEinkommensbonus ? FOERDERUNG_EINKOMMEN : FOERDERUNG_BASIS
-  const foerderBetrag = istEigentuemer
-    ? Math.round(ANLAGEN_PREIS * foerderProzent)
-    : Math.round(ANLAGEN_PREIS * 0.15)
-  const nettoinvest = ANLAGEN_PREIS - foerderBetrag
+  if (heizungsart === 'oel') {
+    prozent = 55
+  } else {
+    const alter = heizungsalter === 'ue20' ? 20 : heizungsalter === '10-20' ? 15 : 5
+    if (alter >= 20) prozent = 55
+  }
 
-  const ersparnis = altKosten - wpKosten
-  const pvBonus = pv === 'ja' ? Math.round(wpKosten * 0.25) : 0
+  if (einkommensBonus) prozent = Math.min(prozent + 20, 70)
+
+  const foerderBasis = Math.min(anlagenPreis, 30000)
+  const betrag = Math.round(foerderBasis * (prozent / 100))
+
+  return { prozent, betrag }
+}
+
+export function berechneWirtschaftlichkeit(antworten) {
+  const { verbrauch, heizungsart, heizflaeche, pv } = antworten
+
+  const verbrauchKwh = !verbrauch || verbrauch === 'default'
+    ? 20000
+    : parseFloat(verbrauch)
+
+  const wpGroesse    = getWpGroesse(verbrauchKwh)
+  const anlagenPreis = WP_PREISE[wpGroesse]
+
+  const foerderung  = berechneForoerderung(antworten, anlagenPreis)
+  const nettoinvest = anlagenPreis - foerderung.betrag
+
+  const altKosten = Math.round(verbrauchKwh * (MARKTPREISE[heizungsart] || 0.11))
+
+  const cop = COP[heizflaeche] || 4.0
+  const wpVerbrauch = (verbrauchKwh / cop) * 1.12
+  const pvBonus = pv === 'ja' ? Math.round(wpVerbrauch * STROMPREIS_WP * 0.25) : 0
+  const wpKosten = Math.round(wpVerbrauch * STROMPREIS_WP - pvBonus)
+
+  const ersparnis = Math.round(altKosten - wpKosten)
 
   let jahre = 0
-  let rest = nettoinvest
+  let rest  = nettoinvest
   while (rest > 0 && jahre < 30) {
     jahre++
-    rest -= (ersparnis + pvBonus) * Math.pow(1 + PREISSTEIGERUNG, jahre)
+    rest -= ersparnis * Math.pow(1 + PREISSTEIGERUNG, jahre)
   }
 
   return {
-    altKosten: Math.round(altKosten),
-    wpKosten: Math.round(wpKosten),
-    ersparnis: Math.round(ersparnis + pvBonus),
-    wpVerbrauch: Math.round(wpVerbrauch),
-    foerderBetrag,
-    foerderProzent: Math.round(foerderProzent * 100),
+    wpGroesse,
+    anlagenPreis,
+    foerderProzent: foerderung.prozent,
+    foerderBetrag:  foerderung.betrag,
     nettoinvest,
-    amortisation: jahre <= 0 ? null : jahre,
-    anlagenPreis: ANLAGEN_PREIS,
+    altKosten,
+    wpKosten,
+    ersparnis,
     pvBonus,
-    cop: cop.toFixed(1)
+    amortisation: jahre <= 0 ? null : jahre,
+    verbrauchKwh,
+    cop: cop.toFixed(1),
   }
 }
