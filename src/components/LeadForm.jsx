@@ -2,11 +2,87 @@ import React, { useState } from 'react'
 
 const fmt = n => n?.toLocaleString('de-DE') + ' €'
 
+function LivePreview({ name, plz, adresse }) {
+  return (
+    <div style={{
+      background: '#0a0a0a', borderRadius: '16px',
+      overflow: 'hidden', position: 'sticky', top: '24px'
+    }}>
+      {/* Header */}
+      <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ fontSize: '16px', fontWeight: 500, color: '#fff' }}>
+          heiz<span style={{ color: '#1D9E75' }}>check</span>
+        </div>
+        <div style={{ fontSize: '10px', color: '#085041', background: '#E1F5EE', padding: '3px 10px', borderRadius: '20px', fontWeight: 500 }}>
+          Wird erstellt...
+        </div>
+      </div>
+
+      {/* Report Vorschau */}
+      <div style={{ padding: '20px' }}>
+        {/* Name */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Report für</div>
+          <div style={{
+            fontSize: '20px', fontWeight: 500, letterSpacing: '-0.3px',
+            color: name ? '#fff' : 'rgba(255,255,255,0.2)',
+            transition: 'color 0.2s ease'
+          }}>
+            {name || 'Dein Name'}
+          </div>
+        </div>
+
+        {/* PLZ */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Region</div>
+          <div style={{
+            fontSize: '15px', fontWeight: 500,
+            color: plz ? '#1D9E75' : 'rgba(255,255,255,0.2)',
+            transition: 'color 0.2s ease'
+          }}>
+            {plz || 'Postleitzahl'}
+            {adresse && <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 400, fontSize: '13px' }}> · {adresse}</span>}
+          </div>
+        </div>
+
+        {/* Was kommt rein */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>Dein Report enthält</div>
+          {[
+            'Persönliche Wirtschaftlichkeitsberechnung',
+            'Heizkosten heute vs. mit Wärmepumpe',
+            'Exakte Förderungshöhe (KfW BEG)',
+            'Netto-Investition nach Förderung',
+            '5 Spartipps von Experten',
+            '3 geprüfte Fachbetriebe in deiner Region',
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' }}>
+              <span style={{ color: '#1D9E75', fontSize: '12px', flexShrink: 0, marginTop: '1px' }}>✓</span>
+              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>{item}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Unten */}
+        <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(29,158,117,0.15)', borderRadius: '10px', border: '1px solid rgba(29,158,117,0.3)' }}>
+          <div style={{ fontSize: '11px', color: '#1D9E75', fontWeight: 500, marginBottom: '2px' }}>
+            95% der finalen Angebote stimmen überein
+          </div>
+          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>
+            Basierend auf echten Installationspreisen
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ReportEmpfaenger({ onWeiter }) {
   const [name, setName] = useState('')
   const [plz, setPlz] = useState('')
   const [adresse, setAdresse] = useState('')
   const [fehler, setFehler] = useState('')
+  const [isMobile] = useState(window.innerWidth < 900)
 
   function weiter() {
     if (!name.trim()) { setFehler('Bitte gib deinen Vornamen ein.'); return }
@@ -15,8 +91,8 @@ export function ReportEmpfaenger({ onWeiter }) {
     onWeiter({ name: name.trim(), plz: plz.trim(), adresse: adresse.trim() || null })
   }
 
-  return (
-    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 1rem' }}>
+  const formular = (
+    <div>
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: '6px',
         fontSize: '11px', fontWeight: 500, color: '#085041',
@@ -32,7 +108,7 @@ export function ReportEmpfaenger({ onWeiter }) {
         Für wen erstellen wir den Report?
       </h2>
       <p style={{ fontSize: '14px', color: '#6b6966', marginBottom: '1.75rem', lineHeight: 1.6 }}>
-        Dein Report wird persönlich auf dich zugeschnitten — mit deinen Zahlen, deiner Region.
+        Dein Report wird sofort personalisiert — gib deinen Namen ein und sieh wie er entsteht.
       </p>
 
       {[
@@ -51,7 +127,7 @@ export function ReportEmpfaenger({ onWeiter }) {
           <input
             type={field.type}
             value={field.value}
-            onChange={e => field.set(e.target.value)}
+            onChange={e => { field.set(e.target.value); setFehler('') }}
             placeholder={field.placeholder}
             maxLength={field.maxLength}
             style={{
@@ -90,6 +166,25 @@ export function ReportEmpfaenger({ onWeiter }) {
       <div style={{ textAlign: 'center', fontSize: '11px', color: '#a09e9a' }}>
         🔒 Deine Daten werden nicht ohne deine Zustimmung weitergegeben
       </div>
+    </div>
+  )
+
+  if (isMobile) {
+    return (
+      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 1rem' }}>
+        {formular}
+      </div>
+    )
+  }
+
+  return (
+    <div style={{
+      maxWidth: '1100px', margin: '0 auto', padding: '0 6%',
+      display: 'grid', gridTemplateColumns: '1fr 400px',
+      gap: '60px', alignItems: 'start'
+    }}>
+      <div>{formular}</div>
+      <LivePreview name={name} plz={plz} adresse={adresse} />
     </div>
   )
 }
@@ -136,18 +231,16 @@ export function FirmenAnfrage({ kontakt, ergebnis, onErfolg }) {
       </p>
 
       <div style={{ background: '#f8f8f7', borderRadius: '10px', padding: '12px 16px', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b6966', marginBottom: '4px' }}>
-          <span>Anlagengröße</span>
-          <span style={{ fontWeight: 500, color: '#0a0a0a' }}>{ergebnis?.wpGroesse?.toUpperCase()}</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b6966', marginBottom: '4px' }}>
-          <span>Durchschnittspreis</span>
-          <span style={{ fontWeight: 500, color: '#0a0a0a' }}>{fmt(ergebnis?.anlagenPreis)}</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b6966' }}>
-          <span>Nach Förderung</span>
-          <span style={{ fontWeight: 500, color: '#1D9E75' }}>{fmt(ergebnis?.nettoinvest)}</span>
-        </div>
+        {[
+          { label: 'Anlagengröße', wert: ergebnis?.wpGroesse?.toUpperCase() },
+          { label: 'Durchschnittspreis', wert: fmt(ergebnis?.anlagenPreis) },
+          { label: 'Nach Förderung', wert: fmt(ergebnis?.nettoinvest), gruen: true },
+        ].map(({ label, wert, gruen }) => (
+          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b6966', marginBottom: '4px' }}>
+            <span>{label}</span>
+            <span style={{ fontWeight: 500, color: gruen ? '#1D9E75' : '#0a0a0a' }}>{wert}</span>
+          </div>
+        ))}
       </div>
 
       <div style={{ marginBottom: '16px' }}>
