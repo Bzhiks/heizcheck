@@ -5,6 +5,15 @@ const fmt = n => n?.toLocaleString('de-DE') + ' €'
 export function ReportEmpfaenger({ onWeiter }) {
   const [name, setName] = useState('')
   const [plz, setPlz] = useState('')
+  const [adresse, setAdresse] = useState('')
+  const [fehler, setFehler] = useState('')
+
+  function weiter() {
+    if (!name.trim()) { setFehler('Bitte gib deinen Vornamen ein.'); return }
+    if (!plz.trim() || plz.length < 5) { setFehler('Bitte gib deine Postleitzahl ein.'); return }
+    setFehler('')
+    onWeiter({ name: name.trim(), plz: plz.trim(), adresse: adresse.trim() || null })
+  }
 
   return (
     <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 1rem' }}>
@@ -23,68 +32,63 @@ export function ReportEmpfaenger({ onWeiter }) {
         Für wen erstellen wir den Report?
       </h2>
       <p style={{ fontSize: '14px', color: '#6b6966', marginBottom: '1.75rem', lineHeight: 1.6 }}>
-        Optional — aber mit deinem Namen wird der Report persönlich auf dich zugeschnitten.
+        Dein Report wird persönlich auf dich zugeschnitten — mit deinen Zahlen, deiner Region.
       </p>
 
-      <div style={{ marginBottom: '12px' }}>
-        <label style={{ display: 'block', fontSize: '12px', color: '#a09e9a', marginBottom: '5px' }}>
-          Vorname <span style={{ color: '#e2e1de' }}>— optional</span>
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="z.B. Thomas"
-          style={{
-            width: '100%', padding: '13px 14px',
-            border: '1px solid #e2e1de', borderRadius: '10px',
-            fontSize: '15px', color: '#0a0a0a', background: '#fff',
-            fontFamily: "'DM Sans', sans-serif", outline: 'none',
-            boxSizing: 'border-box'
-          }}
-          onFocus={e => e.target.style.borderColor = '#0a0a0a'}
-          onBlur={e => e.target.style.borderColor = '#e2e1de'}
-        />
-      </div>
+      {[
+        { key: 'name', label: 'Vorname', placeholder: 'z.B. Thomas', value: name, set: setName, type: 'text', pflicht: true },
+        { key: 'plz', label: 'Postleitzahl', placeholder: 'z.B. 50667', value: plz, set: setPlz, type: 'text', maxLength: 5, pflicht: true },
+        { key: 'adresse', label: 'Straße & Hausnummer', placeholder: 'z.B. Musterstraße 12', value: adresse, set: setAdresse, type: 'text', pflicht: false },
+      ].map(field => (
+        <div key={field.key} style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: '#a09e9a', marginBottom: '5px' }}>
+            {field.label}{' '}
+            {field.pflicht
+              ? <span style={{ color: '#E24B4A' }}>*</span>
+              : <span style={{ color: '#e2e1de' }}>— optional</span>
+            }
+          </label>
+          <input
+            type={field.type}
+            value={field.value}
+            onChange={e => field.set(e.target.value)}
+            placeholder={field.placeholder}
+            maxLength={field.maxLength}
+            style={{
+              width: '100%', padding: '13px 14px',
+              border: '1px solid #e2e1de', borderRadius: '10px',
+              fontSize: '15px', color: '#0a0a0a', background: '#fff',
+              fontFamily: "'DM Sans', sans-serif", outline: 'none',
+              boxSizing: 'border-box'
+            }}
+            onFocus={e => e.target.style.borderColor = '#0a0a0a'}
+            onBlur={e => e.target.style.borderColor = '#e2e1de'}
+          />
+        </div>
+      ))}
 
-      <div style={{ marginBottom: '20px' }}>
-        <label style={{ display: 'block', fontSize: '12px', color: '#a09e9a', marginBottom: '5px' }}>
-          Postleitzahl <span style={{ color: '#1D9E75', fontSize: '11px' }}>— für Firmensuche in deiner Nähe</span>
-        </label>
-        <input
-          type="text"
-          value={plz}
-          onChange={e => setPlz(e.target.value)}
-          placeholder="z.B. 50667"
-          maxLength={5}
-          style={{
-            width: '100%', padding: '13px 14px',
-            border: '1px solid #e2e1de', borderRadius: '10px',
-            fontSize: '15px', color: '#0a0a0a', background: '#fff',
-            fontFamily: "'DM Sans', sans-serif", outline: 'none',
-            boxSizing: 'border-box'
-          }}
-          onFocus={e => e.target.style.borderColor = '#0a0a0a'}
-          onBlur={e => e.target.style.borderColor = '#e2e1de'}
-        />
-      </div>
+      {fehler && (
+        <div style={{ padding: '10px 14px', background: '#FCEBEB', border: '1px solid #F09595', borderRadius: '8px', fontSize: '13px', color: '#A32D2D', marginBottom: '1rem' }}>
+          {fehler}
+        </div>
+      )}
 
       <button
-        onClick={() => onWeiter({ name: name || null, plz: plz || null })}
+        onClick={weiter}
         style={{
           width: '100%', padding: '14px',
           background: '#0a0a0a', color: '#fff',
           border: 'none', borderRadius: '12px',
           fontSize: '15px', fontWeight: 500,
           cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-          marginBottom: '10px'
+          marginBottom: '10px', marginTop: '4px'
         }}
       >
         Berechnung starten →
       </button>
 
       <div style={{ textAlign: 'center', fontSize: '11px', color: '#a09e9a' }}>
-        Keine Pflichtangaben — du kannst jederzeit überspringen
+        🔒 Deine Daten werden nicht ohne deine Zustimmung weitergegeben
       </div>
     </div>
   )
@@ -92,7 +96,6 @@ export function ReportEmpfaenger({ onWeiter }) {
 
 export function FirmenAnfrage({ kontakt, ergebnis, onErfolg }) {
   const [tel, setTel] = useState('')
-  const [adresse, setAdresse] = useState('')
   const [laden, setLaden] = useState(false)
   const [fehler, setFehler] = useState('')
 
@@ -104,11 +107,11 @@ export function FirmenAnfrage({ kontakt, ergebnis, onErfolg }) {
       await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kontakt: { ...kontakt, tel, adresse }, ergebnis, typ: 'firmen' })
+        body: JSON.stringify({ kontakt: { ...kontakt, tel }, ergebnis, typ: 'firmen' })
       })
     } catch {}
     setLaden(false)
-    onErfolg({ ...kontakt, tel, adresse })
+    onErfolg({ ...kontakt, tel })
   }
 
   return (
@@ -147,7 +150,7 @@ export function FirmenAnfrage({ kontakt, ergebnis, onErfolg }) {
         </div>
       </div>
 
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <label style={{ display: 'block', fontSize: '12px', color: '#a09e9a', marginBottom: '5px' }}>
           Telefonnummer <span style={{ color: '#E24B4A' }}>*</span>
         </label>
@@ -156,27 +159,6 @@ export function FirmenAnfrage({ kontakt, ergebnis, onErfolg }) {
           value={tel}
           onChange={e => setTel(e.target.value)}
           placeholder="z.B. 0172 1234567"
-          style={{
-            width: '100%', padding: '13px 14px',
-            border: '1px solid #e2e1de', borderRadius: '10px',
-            fontSize: '15px', color: '#0a0a0a', background: '#fff',
-            fontFamily: "'DM Sans', sans-serif", outline: 'none',
-            boxSizing: 'border-box'
-          }}
-          onFocus={e => e.target.style.borderColor = '#0a0a0a'}
-          onBlur={e => e.target.style.borderColor = '#e2e1de'}
-        />
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '12px', color: '#a09e9a', marginBottom: '5px' }}>
-          Straße & Hausnummer <span style={{ color: '#e2e1de' }}>— optional</span>
-        </label>
-        <input
-          type="text"
-          value={adresse}
-          onChange={e => setAdresse(e.target.value)}
-          placeholder="z.B. Musterstraße 12"
           style={{
             width: '100%', padding: '13px 14px',
             border: '1px solid #e2e1de', borderRadius: '10px',
