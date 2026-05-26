@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Konfigurator from './components/Konfigurator.jsx'
-import { ReportEmpfaenger, FirmenAnfrage } from './components/LeadForm.jsx'
+import { FirmenAnfrage } from './components/LeadForm.jsx'
 import Danke from './components/Danke.jsx'
 import { generateInfoPDF } from './utils/generatePDF.js'
 
@@ -135,7 +135,7 @@ export default function App() {
           <LandingPage onStart={() => setAnsicht(A.EMPFAENGER)} isMobile={isMobile} />
         )}
 
-        {ansicht === A.EMPFAENGER && (
+        {ansicht === A.EMPFAENGER_OLD && (
           <div style={{ paddingTop: '2rem' }}>
             <ReportEmpfaenger
               onWeiter={kontakt => {
