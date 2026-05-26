@@ -132,18 +132,7 @@ export default function App() {
       <main style={{ padding: ansicht === A.START ? 0 : '1.5rem 0 4rem' }}>
 
         {ansicht === A.START && (
-          <LandingPage onStart={() => setAnsicht(A.EMPFAENGER)} isMobile={isMobile} />
-        )}
-
-        {ansicht === A.EMPFAENGER_OLD && (
-          <div style={{ paddingTop: '2rem' }}>
-            <ReportEmpfaenger
-              onWeiter={kontakt => {
-                setDaten(prev => ({ ...prev, kontakt }))
-                setAnsicht(A.KONFIGURATOR)
-              }}
-            />
-          </div>
+          <LandingPage onStart={() => setAnsicht(A.KONFIGURATOR)} isMobile={isMobile} />
         )}
 
         {ansicht === A.KONFIGURATOR && (
