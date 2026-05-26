@@ -5,11 +5,13 @@ const fmt = n => n?.toLocaleString('de-DE') + ' €'
 function LivePreview({ name, plz, adresse }) {
   return (
     <div style={{
-      background: '#0a0a0a', borderRadius: '16px',
-      overflow: 'hidden', position: 'sticky', top: '24px'
+      background: '#fff', borderRadius: '16px',
+      border: '1px solid #e2e1de',
+      overflow: 'hidden', position: 'sticky', top: '24px',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.06)'
     }}>
-      {/* Header */}
-      <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      {/* Header wie finaler Report */}
+      <div style={{ background: '#0a0a0a', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '16px', fontWeight: 500, color: '#fff' }}>
           heiz<span style={{ color: '#1D9E75' }}>check</span>
         </div>
@@ -18,57 +20,60 @@ function LivePreview({ name, plz, adresse }) {
         </div>
       </div>
 
-      {/* Report Vorschau */}
-      <div style={{ padding: '20px' }}>
-        {/* Name */}
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Report für</div>
-          <div style={{
-            fontSize: '20px', fontWeight: 500, letterSpacing: '-0.3px',
-            color: name ? '#fff' : 'rgba(255,255,255,0.2)',
-            transition: 'color 0.2s ease'
-          }}>
-            {name || 'Dein Name'}
-          </div>
+      {/* Name + PLZ Section */}
+      <div style={{ background: '#FAFAF8', padding: '16px 20px', borderBottom: '1px solid #e2e1de' }}>
+        <div style={{ fontSize: '10px', color: '#a09e9a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Persönlicher Report für</div>
+        <div style={{
+          fontSize: '20px', fontWeight: 500, letterSpacing: '-0.3px',
+          color: name ? '#0a0a0a' : '#e2e1de',
+          transition: 'color 0.2s ease', marginBottom: '4px'
+        }}>
+          {name || 'Dein Name'}
         </div>
-
-        {/* PLZ */}
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Region</div>
-          <div style={{
-            fontSize: '15px', fontWeight: 500,
-            color: plz ? '#1D9E75' : 'rgba(255,255,255,0.2)',
-            transition: 'color 0.2s ease'
-          }}>
-            {plz || 'Postleitzahl'}
-            {adresse && <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 400, fontSize: '13px' }}> · {adresse}</span>}
-          </div>
+        <div style={{
+          fontSize: '13px',
+          color: plz ? '#1D9E75' : '#e2e1de',
+          transition: 'color 0.2s ease'
+        }}>
+          {plz ? `PLZ ${plz}` : 'Postleitzahl'}{adresse ? ` · ${adresse}` : ''}
         </div>
+      </div>
 
-        {/* Was kommt rein */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>Dein Report enthält</div>
+      {/* Report Inhalt */}
+      <div style={{ padding: '16px 20px' }}>
+        <div style={{ fontSize: '10px', color: '#a09e9a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>Dein Report enthält</div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
           {[
-            'Persönliche Wirtschaftlichkeitsberechnung',
-            'Heizkosten heute vs. mit Wärmepumpe',
-            'Exakte Förderungshöhe (KfW BEG)',
-            'Netto-Investition nach Förderung',
-            '5 Spartipps von Experten',
-            '3 geprüfte Fachbetriebe in deiner Region',
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' }}>
-              <span style={{ color: '#1D9E75', fontSize: '12px', flexShrink: 0, marginTop: '1px' }}>✓</span>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>{item}</span>
+            { label: 'Heizkosten heute', wert: '—', sub: 'pro Jahr' },
+            { label: 'Mit Wärmepumpe', wert: '—', sub: 'pro Jahr', gruen: true },
+            { label: 'Ersparnis', wert: '—', sub: 'pro Jahr', gruen: true },
+            { label: 'Förderung', wert: '—', sub: 'KfW BEG', gruen: true },
+          ].map(({ label, wert, sub, gruen }) => (
+            <div key={label} style={{ background: '#f8f8f7', borderRadius: '8px', padding: '10px' }}>
+              <div style={{ fontSize: '9px', color: '#a09e9a', marginBottom: '3px', textTransform: 'uppercase' }}>{label}</div>
+              <div style={{ fontSize: '16px', fontWeight: 500, color: gruen ? '#1D9E75' : '#0a0a0a' }}>{wert}</div>
+              <div style={{ fontSize: '10px', color: '#a09e9a' }}>{sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Unten */}
-        <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(29,158,117,0.15)', borderRadius: '10px', border: '1px solid rgba(29,158,117,0.3)' }}>
-          <div style={{ fontSize: '11px', color: '#1D9E75', fontWeight: 500, marginBottom: '2px' }}>
+        {[
+          '5 Spartipps von Experten',
+          '3 geprüfte Fachbetriebe in deiner Region',
+          'Investitionsübersicht nach Förderung',
+        ].map((item, i) => (
+          <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '4px 0', borderBottom: i < 2 ? '1px solid #f0efed' : 'none' }}>
+            <span style={{ color: '#1D9E75', fontSize: '12px', flexShrink: 0 }}>✓</span>
+            <span style={{ fontSize: '12px', color: '#6b6966' }}>{item}</span>
+          </div>
+        ))}
+
+        <div style={{ marginTop: '12px', padding: '10px 12px', background: '#E1F5EE', borderRadius: '8px' }}>
+          <div style={{ fontSize: '11px', color: '#085041', fontWeight: 500 }}>
             95% der finalen Angebote stimmen überein
           </div>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>
+          <div style={{ fontSize: '10px', color: '#6b6966', marginTop: '2px' }}>
             Basierend auf echten Installationspreisen
           </div>
         </div>
@@ -108,7 +113,7 @@ export function ReportEmpfaenger({ onWeiter }) {
         Für wen erstellen wir den Report?
       </h2>
       <p style={{ fontSize: '14px', color: '#6b6966', marginBottom: '1.75rem', lineHeight: 1.6 }}>
-        Dein Report wird sofort personalisiert — gib deinen Namen ein und sieh wie er entsteht.
+        Gib deinen Namen ein — dein Report wird sofort rechts personalisiert.
       </p>
 
       {[
@@ -227,7 +232,7 @@ export function FirmenAnfrage({ kontakt, ergebnis, onErfolg }) {
         <span style={{ color: '#1D9E75' }}> wie erreichen wir dich?</span>
       </h2>
       <p style={{ fontSize: '14px', color: '#6b6966', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-        Die 3 Fachbetriebe in {kontakt?.plz || 'deiner Region'} melden sich innerhalb von 24h bei dir.
+        Die 3 Fachbetriebe in {kontakt?.plz || 'deiner Region'} melden sich innerhalb von 24h.
       </p>
 
       <div style={{ background: '#f8f8f7', borderRadius: '10px', padding: '12px 16px', marginBottom: '1.25rem' }}>
