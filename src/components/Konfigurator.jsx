@@ -316,9 +316,6 @@ function FinalReport({ ergebnis, antworten, person, onAngebot, onDownload }) {
         <button onClick={onAngebot} style={{ width: '100%', padding: '14px', background: '#1D9E75', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", marginBottom: '10px' }}>
           3 Firmen anfragen + persönlichen Report erhalten →
         </button>
-        <button onClick={onDownload} style={{ width: '100%', padding: '13px', background: '#fff', color: '#0a0a0a', border: '1px solid #e2e1de', borderRadius: '12px', fontSize: '14px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-          📄 Info-Report herunterladen — kostenlos, anonym
-        </button>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '11px', color: '#a09e9a', marginTop: '10px' }}>
           <span>🔒 Kein Spam</span><span>📞 Max. 3 Anrufe</span><span>✓ Kostenlos</span>
         </div>
