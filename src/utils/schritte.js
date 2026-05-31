@@ -199,4 +199,3 @@ export const gefilterteSchritte = (antworten) => {
     return true
   })
 }
-EOF
