@@ -3,16 +3,20 @@ import Konfigurator from './components/Konfigurator.jsx'
 import { FirmenAnfrage } from './components/LeadForm.jsx'
 import Danke from './components/Danke.jsx'
 import { generateInfoPDF } from './utils/generatePDF.js'
+import Admin from './components/Admin.jsx'
 
-const A = { START: 'start', EMPFAENGER: 'empfaenger', KONFIGURATOR: 'konfigurator', FIRMEN: 'firmen', DANKE: 'danke' }
+const A = { START: 'start', KONFIGURATOR: 'konfigurator', FIRMEN: 'firmen', DANKE: 'danke', ADMIN: 'admin' }
 
-function Nav({ onLogo }) {
+function Nav({ onLogo, onAdmin }) {
   return (
     <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid #f0efed' }}>
       <button onClick={onLogo} style={{ background: 'none', border: 'none', fontSize: '18px', fontWeight: 500, cursor: 'pointer', color: '#0a0a0a', fontFamily: "'DM Sans', sans-serif" }}>
         heiz<span style={{ color: '#1D9E75' }}>check</span>
       </button>
-      <div style={{ fontSize: '13px', color: '#a09e9a' }}>3 Schritte · 3 Minuten · Kostenlos</div>
+      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <span style={{ fontSize: '13px', color: '#a09e9a' }}>3 Schritte · 3 Minuten · Kostenlos</span>
+        <button onClick={onAdmin} style={{ background: 'none', border: 'none', fontSize: '12px', color: '#e2e1de', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>●</button>
+      </div>
     </nav>
   )
 }
@@ -128,7 +132,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#FAFAF8' }}>
-      <Nav onLogo={neustart} />
+      <Nav onLogo={neustart} onAdmin={() => setAnsicht(A.ADMIN)} />
       <main style={{ padding: ansicht === A.START ? 0 : '1.5rem 0 4rem' }}>
 
         {ansicht === A.START && (
@@ -138,8 +142,8 @@ export default function App() {
         {ansicht === A.KONFIGURATOR && (
           <Konfigurator
             kontakt={daten.kontakt}
-            onFertig={({ antworten, ergebnis, ziel }) => {
-              setDaten(prev => ({ ...prev, antworten, ergebnis }))
+            onFertig={({ antworten, ergebnis, person, ziel }) => {
+              setDaten(prev => ({ ...prev, antworten, ergebnis, kontakt: person || prev.kontakt }))
               if (ziel === 'download') {
                 generateInfoPDF(ergebnis, antworten)
               } else if (ziel === 'angebot') {
@@ -165,6 +169,11 @@ export default function App() {
         {ansicht === A.DANKE && (
           <Danke kontakt={daten.kontakt} onNeustart={neustart} />
         )}
+
+        {ansicht === A.ADMIN && (
+          <Admin />
+        )}
+
       </main>
     </div>
   )
