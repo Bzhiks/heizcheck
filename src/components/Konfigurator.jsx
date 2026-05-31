@@ -116,9 +116,9 @@ function LiveReport({ person, antworten, schritt, schritte, phase }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
             {[
               { label: 'Gebäude', wert: antworten.gebaeudetyp === 'efh' ? 'Einfamilienhaus' : antworten.gebaeudetyp === 'dhh' ? 'Doppelhaushälfte' : antworten.gebaeudetyp === 'rh' ? 'Reihenhaus' : antworten.gebaeudetyp === 'mfh' ? 'Mehrfamilienhaus' : '—' },
-              { label: 'Baujahr', wert: bauLabel[antworten.baujahr] || '—' },
+              { label: 'Baujahr', wert: antworten.baujahr || '—' },
               { label: 'Heizung', wert: heizLabel[antworten.heizungsart] || '—' },
-              { label: 'Verbrauch', wert: antworten.verbrauch ? (antworten.verbrauch === 'default' ? '20.000 kWh' : antworten.verbrauch + ' kWh') : '—' },
+              { label: 'Verbrauch', wert: antworten.verbrauch && antworten.verbrauch !== 'default' ? antworten.verbrauch + ' kWh' : antworten.verbrauch === 'default' ? '20.000 kWh' : '—' },
             ].map(({ label, wert }) => (
               <div key={label} style={{ background: '#f8f8f7', borderRadius: '8px', padding: '8px 10px', border: '1px solid #e2e1de' }}>
                 <div style={{ fontSize: '9px', color: '#a09e9a', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
