@@ -1,4 +1,3 @@
-cat > ~/heizcheck/src/utils/schritte.js << 'EOF'
 export const BLOCK1 = [
   {
     id: 'gebaeudetyp',
