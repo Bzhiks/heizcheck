@@ -1,3 +1,4 @@
+cat > ~/heizcheck/src/utils/schritte.js << 'EOF'
 export const BLOCK1 = [
   {
     id: 'gebaeudetyp',
@@ -15,13 +16,11 @@ export const BLOCK1 = [
     id: 'baujahr',
     block: 1,
     frage: 'Wann wurde dein Haus gebaut?',
-    typ: 'auswahl',
-    optionen: [
-      { wert: 'vor1970',   label: 'Vor 1970',      sub: 'Altbau' },
-      { wert: '1970-1990', label: '1970 – 1990',   sub: 'Älterer Bestand' },
-      { wert: '1990-2010', label: '1990 – 2010',   sub: 'Neuerer Bestand' },
-      { wert: 'nach2010',  label: 'Nach 2010',     sub: 'Modernes Haus' },
-    ]
+    typ: 'eingabe',
+    placeholder: 'z.B. 1985',
+    einheit: 'Jahr',
+    tipp: 'Steht im Grundbuch oder auf dem Energieausweis. Ungefähres Jahr ist ok.',
+    tippAktion: 'Ungefähr 1990 (Durchschnitt verwenden)'
   },
   {
     id: 'heizungsart',
@@ -40,11 +39,23 @@ export const BLOCK1 = [
     id: 'heizungsalter',
     block: 1,
     frage: 'Wie alt ist deine aktuelle Heizung?',
+    typ: 'eingabe',
+    placeholder: 'z.B. 2005',
+    einheit: 'Baujahr',
+    tipp: 'Steht auf dem Typenschild der Heizung — meist vorne oder seitlich angebracht.',
+    tippAktion: 'Ungefähr 2000 (Durchschnitt verwenden)'
+  },
+  {
+    id: 'personen',
+    block: 1,
+    frage: 'Wie viele Personen wohnen bei euch?',
     typ: 'auswahl',
     optionen: [
-      { wert: 'u10',   label: 'Unter 10 Jahre',  sub: 'Läuft noch gut' },
-      { wert: '10-20', label: '10 – 20 Jahre',   sub: 'Bald fällig' },
-      { wert: 'ue20',  label: 'Über 20 Jahre',   sub: 'Jetzt wechseln lohnt sich' },
+      { wert: '1', label: '1 Person',   icon: '🧑' },
+      { wert: '2', label: '2 Personen', icon: '👫' },
+      { wert: '3', label: '3 Personen', icon: '👨‍👩‍👦' },
+      { wert: '4', label: '4 Personen', icon: '👨‍👩‍👧‍👦' },
+      { wert: '5', label: '5+',         icon: '👨‍👩‍👧‍👦' },
     ]
   },
   {
@@ -61,53 +72,49 @@ export const BLOCK1 = [
 
 export const BLOCK2 = [
   {
-    id: 'personen',
-    block: 2,
-    frage: 'Wie viele Personen wohnen bei euch?',
-    typ: 'auswahl',
-    optionen: [
-      { wert: '1', label: '1 Person',   icon: '🧑' },
-      { wert: '2', label: '2 Personen', icon: '👫' },
-      { wert: '3', label: '3 Personen', icon: '👨‍👩‍👦' },
-      { wert: '4', label: '4 Personen', icon: '👨‍👩‍👧‍👦' },
-      { wert: '5', label: '5+',         icon: '👨‍👩‍👧‍👦' },
-    ]
-  },
-  {
     id: 'heizflaeche',
     block: 2,
     frage: 'Was hast du für Heizflächen im Haus?',
-    info: 'Das ist wichtig — Fußbodenheizung braucht weniger Temperatur und ist ideal für Wärmepumpen.',
+    info: 'Fußbodenheizung braucht weniger Vorlauftemperatur — ideal für Wärmepumpen und senkt die Betriebskosten deutlich.',
     typ: 'auswahl',
     optionen: [
-      { wert: 'fub', label: 'Fußbodenheizung',    sub: '✅ Ideal für Wärmepumpe' },
-      { wert: 'mix', label: 'Beides gemischt',     sub: '✅ Gut geeignet' },
-      { wert: 'hk',  label: 'Nur Heizkörper',      sub: 'ℹ️ Funktioniert, kleine Anpassung möglich' },
+      { wert: 'fub', label: 'Fußbodenheizung',                sub: '✅ Ideal für Wärmepumpe' },
+      { wert: 'mix', label: 'Heizkörper + Fußbodenheizung',   sub: '✅ Gut geeignet' },
+      { wert: 'hk',  label: 'Nur Heizkörper',                 sub: 'ℹ️ Funktioniert, kleine Anpassung möglich' },
     ]
   },
   {
     id: 'warmwasser',
     block: 2,
-    frage: 'Wie lange dauert es bis warmes Wasser aus dem Hahn kommt?',
-    info: 'Das verrät uns ob du eine Zirkulationsleitung hast — wichtig für die Planung.',
+    frage: 'Hast du eine Zirkulationsleitung?',
+    info: 'Einfacher Test: Dreh den Warmwasserhahn auf. Kommt das warme Wasser sofort (unter 5 Sekunden)? Dann hast du eine Zirkulationsleitung. Dauert es länger? Dann nicht.',
     typ: 'auswahl',
     optionen: [
-      { wert: 'sofort', label: 'Sofort warm',   sub: 'Unter 5 Sekunden' },
-      { wert: 'kurz',   label: 'Kurz warten',   sub: '5 – 30 Sekunden' },
-      { wert: 'lang',   label: 'Lange warten',  sub: 'Über 30 Sekunden' },
+      { wert: 'ja',   label: 'Ja — Wasser kommt sofort warm',     sub: 'Zirkulationsleitung vorhanden' },
+      { wert: 'nein', label: 'Nein — Wasser braucht etwas',        sub: 'Keine Zirkulationsleitung' },
     ]
   },
   {
-    id: 'zaehlerkasten',
+    id: 'zaehlerkasten_modernisiert',
     block: 2,
-    frage: 'Wie sieht dein Stromkasten aus?',
-    info: 'Schau kurz in den Keller oder Flur. Welches Bild passt am besten?',
+    frage: 'Wurde dein Zählerschrank jemals modernisiert?',
+    info: 'Ein moderner Zählerschrank hat Sicherungsautomaten (kleine Schalter). Ein alter hat Schraubsicherungen (runde Keramikteile).',
     typ: 'auswahl',
     optionen: [
-      { wert: 'modern', label: 'Moderner Kasten',   sub: 'Kunststoff, neuwertig, Sicherungsautomaten', img: '🟢' },
-      { wert: 'mittel', label: 'Älterer Kasten',    sub: 'Etwas älter, gemischte Sicherungen',        img: '🟡' },
-      { wert: 'alt',    label: 'Sehr alter Kasten', sub: 'Schraubsicherungen, Keramiksicherungen',     img: '🔴' },
-      { wert: 'weiss',  label: 'Weiß ich nicht',    sub: 'Kein Problem, wird vor Ort geprüft' },
+      { wert: 'ja',   label: 'Ja, wurde modernisiert',   sub: 'Hat Sicherungsautomaten' },
+      { wert: 'nein', label: 'Nein, noch der alte',      sub: 'Hat Schraubsicherungen' },
+    ]
+  },
+  {
+    id: 'zaehlerkasten_wann',
+    block: 2,
+    frage: 'Wann wurde der Zählerschrank modernisiert?',
+    typ: 'auswahl',
+    nur: 'zaehlerkasten_ja',
+    optionen: [
+      { wert: '1-5',   label: 'Vor 1–5 Jahren',    sub: 'Sehr modern' },
+      { wert: '5-10',  label: 'Vor 5–10 Jahren',   sub: 'Modern' },
+      { wert: '10-15', label: 'Vor 10–15 Jahren',  sub: 'Noch akzeptabel' },
     ]
   },
   {
@@ -162,7 +169,7 @@ export const BLOCK3 = [
     id: 'eigentuemer',
     block: 3,
     frage: 'Bist du der Eigentümer und wohnst selbst dort?',
-    info: 'Wichtig für die staatliche Förderung. Eigentümer die selbst einziehen bekommen bis zu 70% Zuschuss.',
+    info: 'Wichtig für die staatliche Förderung. Eigentümer die selbst einwohnen bekommen bis zu 70% Zuschuss.',
     typ: 'auswahl',
     optionen: [
       { wert: 'ja',     label: 'Ja, beides',              sub: '✅ Maximale Förderung möglich' },
@@ -189,6 +196,8 @@ export const ALLE_SCHRITTE = [...BLOCK1, ...BLOCK2, ...BLOCK3]
 export const gefilterteSchritte = (antworten) => {
   return ALLE_SCHRITTE.filter(schritt => {
     if (schritt.nur === 'oel') return antworten.heizungsart === 'oel'
+    if (schritt.nur === 'zaehlerkasten_ja') return antworten.zaehlerkasten_modernisiert === 'ja'
     return true
   })
 }
+EOF
