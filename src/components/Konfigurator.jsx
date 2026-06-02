@@ -202,124 +202,295 @@ function LiveReport({ person, antworten, schritt, schritte, phase }) {
 }
 
 // ─── FINAL REPORT ─────────────────────────────────────────────────────────────
-function FinalReport({ ergebnis, antworten, person, onAngebot, onDownload }) {
+function FinalReport({ ergebnis, antworten, person, onAngebot }) {
   const [visible, setVisible] = useState(false)
   useEffect(() => { setTimeout(() => setVisible(true), 50) }, [])
+
   const heizLabel = { gas: 'Gasheizung', oel: 'Ölheizung', pellets: 'Pelletheizung', strom: 'Stromheizung', fernwaerme: 'Fernwärme' }
+  const heizName = heizLabel[antworten.heizungsart] || 'Heizung'
+
+  // Berechnete Werte
+  const vorteil20 = Math.round((ergebnis.altKosten - ergebnis.wpKosten) * 26.87)
+  const wpEM = Math.round(ergebnis.wpKosten * 0.8)
+  const co2 = ((ergebnis.verbrauchKwh || 20000) * 0.0002).toFixed(1)
+  const stadt = person?.plz && person?.stadt ? `${person.plz} ${person.stadt}` : person?.plz || ''
+  const adresseLine = [person?.adresse, stadt].filter(Boolean).join(' · ')
+
+  const C = {
+    rot: '#E24B4A', rotBg: '#FCEBEB', rotDark: '#A32D2D',
+    gruen: '#1D9E75', gruenDark: '#085041', gruenBg: '#E1F5EE',
+    schwarz: '#0a0a0a', grau: '#6b6966', hellgrau: '#a09e9a',
+    border: '#e2e1de', bgSoft: '#FAFAF8', bgCard: '#f8f8f7'
+  }
+
+  const lbl = { fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.hellgrau, marginBottom: '12px' }
+  const sec = { padding: '26px 32px', borderBottom: `0.5px solid ${C.border}`, background: '#fff' }
 
   return (
     <div style={{
-      maxWidth: '680px', margin: '0 auto',
+      maxWidth: '700px', margin: '0 auto',
+      borderRadius: '16px', border: `0.5px solid ${C.border}`, overflow: 'hidden',
       opacity: visible ? 1 : 0,
-      transform: visible ? 'scale(1) translateY(0)' : 'scale(0.92) translateY(20px)',
+      transform: visible ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(20px)',
       transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      boxShadow: '0 4px 40px rgba(0,0,0,0.08)'
     }}>
-      <div style={{ background: '#0a0a0a', borderRadius: '16px 16px 0 0', padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontSize: '18px', fontWeight: 500, color: '#fff', letterSpacing: '-0.3px' }}>heiz<span style={{ color: '#1D9E75' }}>check</span></div>
-        <div style={{ fontSize: '10px', fontWeight: 500, color: '#085041', background: '#E1F5EE', padding: '4px 12px', borderRadius: '20px' }}>✓ Persönliche Wirtschaftlichkeitsberechnung</div>
+
+      {/* HEADER */}
+      <div style={{ background: C.schwarz, padding: '18px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: '18px', fontWeight: 500, color: '#fff', letterSpacing: '-0.3px' }}>heiz<span style={{ color: C.gruen }}>check</span></div>
+        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>Persönlicher Report · {new Date().toLocaleDateString('de-DE')}</div>
+      </div>
+      <div style={{ height: '3px', background: C.gruen }} />
+
+      {/* HERO PERSON */}
+      <div style={{ background: C.bgSoft, padding: '24px 32px', borderBottom: `0.5px solid ${C.border}` }}>
+        <div style={{ ...lbl, marginBottom: '8px' }}>Report erstellt für</div>
+        <div style={{ fontSize: '30px', fontWeight: 500, color: C.schwarz, letterSpacing: '-1px', marginBottom: '4px' }}>{person?.name || 'Anonym'}</div>
+        <div style={{ fontSize: '13px', color: C.grau }}>{[adresseLine, heizName, 'Einfamilienhaus'].filter(Boolean).join(' · ')}</div>
       </div>
 
-      {/* Person */}
-      <div style={{ background: '#FAFAF8', padding: '20px 28px', borderLeft: '1px solid #e2e1de', borderRight: '1px solid #e2e1de' }}>
-        <div style={{ fontSize: '10px', color: '#a09e9a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Persönlicher Wärmepumpen-Report für</div>
-        <div style={{ fontSize: '22px', fontWeight: 500, color: '#0a0a0a', letterSpacing: '-0.3px', marginBottom: '4px' }}>{person?.name || 'Anonym'}</div>
-        <div style={{ fontSize: '13px', color: '#6b6966' }}>
-          {[person?.adresse, person?.plz && person?.stadt ? `${person.plz} ${person.stadt}` : person?.plz, heizLabel[antworten.heizungsart]].filter(Boolean).join(' · ')}
+      {/* VISION */}
+      <div style={sec}>
+        <div style={{ fontSize: '22px', fontWeight: 500, color: C.schwarz, letterSpacing: '-0.5px', marginBottom: '10px', lineHeight: 1.2 }}>
+          Dein Haus kann eine Energiezentrale werden — <span style={{ color: C.gruen }}>die dir jeden Monat Geld zurückgibt.</span>
+        </div>
+        <div style={{ fontSize: '14px', color: C.grau, lineHeight: 1.7, marginBottom: '16px' }}>
+          Der Wechsel zur Wärmepumpe ist keine Ausgabe — es ist eine Investition die sich rechnet. Mit bis zu 70% staatlicher Förderung und stetig steigenden Energiepreisen war der Zeitpunkt nie besser.
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {['Nachhaltig', 'Kosten sparen', 'Zukunftssicher'].map(t => (
+            <div key={t} style={{ background: C.gruenBg, padding: '5px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 500, color: C.gruenDark }}>{t}</div>
+          ))}
         </div>
       </div>
 
-      <div style={{ background: '#fff', padding: '20px 28px', borderLeft: '1px solid #e2e1de', borderRight: '1px solid #e2e1de', borderTop: '1px solid #e2e1de' }}>
-        <div style={{ fontSize: '17px', fontWeight: 500, color: '#0a0a0a', marginBottom: '4px', letterSpacing: '-0.3px' }}>
-          Mit der richtigen Planung sparst du nicht nur einmal — <span style={{ color: '#1D9E75' }}>sondern jeden Monat.</span>
-        </div>
-      </div>
-
-      {/* 3 Spalten */}
-      <div style={{ background: '#fff', padding: '20px 28px', borderLeft: '1px solid #e2e1de', borderRight: '1px solid #e2e1de', borderTop: '1px solid #e2e1de' }}>
-        <div style={{ fontSize: '10px', fontWeight: 500, color: '#a09e9a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Direktvergleich</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+      {/* GROSSE ZAHL */}
+      <div style={{ background: C.gruenBg, padding: '28px 32px', borderBottom: `0.5px solid ${C.border}` }}>
+        <div style={{ ...lbl, color: C.gruenDark, marginBottom: '8px' }}>Dein 20-Jahres-Vorteil</div>
+        <div style={{ fontSize: '52px', fontWeight: 500, color: C.gruenDark, letterSpacing: '-3px', lineHeight: 1, marginBottom: '8px' }}>{fmt(vorteil20)}</div>
+        <div style={{ fontSize: '14px', color: '#0F6E56', marginBottom: '20px' }}>die du gegenüber deiner {heizName} sparst — bei 3% jährlicher Preissteigerung.</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
           {[
-            { label: heizLabel[antworten.heizungsart] || 'Heute', wert: fmt(ergebnis.altKosten), farbe: '#E24B4A', bg: '#FCEBEB', pros: ['Steigende Preise', 'Energieabhängig', 'Hohe Wartung'], plus: false },
-            { label: 'Wärmepumpe', wert: fmt(ergebnis.wpKosten), farbe: '#1D9E75', bg: '#f8f8f7', pros: ['Deutlich günstiger', 'Unabhängig', 'Niedrige Wartung'], plus: true },
-            { label: 'WP + Energiemgmt.', wert: fmt(Math.round(ergebnis.wpKosten * 0.8)), farbe: '#085041', bg: '#E1F5EE', pros: ['Maximum Ersparnis', 'Automatisch optimiert', 'Zukunftsorientiert'], plus: true },
+            { l: 'Jährlich', v: fmt(ergebnis.ersparnis), s: 'Ersparnis', gruen: true },
+            { l: 'Amortisiert', v: ergebnis.amortisation ? `${ergebnis.amortisation} J.` : '8–9 J.', s: 'dann nur sparen', gruen: false },
+            { l: 'CO₂ gespart', v: `~${co2} t`, s: 'pro Jahr', gruen: true },
+          ].map(({ l, v, s, gruen }) => (
+            <div key={l} style={{ background: '#fff', borderRadius: '10px', padding: '14px', border: `0.5px solid rgba(29,158,117,0.2)` }}>
+              <div style={{ fontSize: '9px', color: C.hellgrau, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>{l}</div>
+              <div style={{ fontSize: '20px', fontWeight: 500, color: gruen ? C.gruen : C.schwarz }}>{v}</div>
+              <div style={{ fontSize: '10px', color: C.hellgrau, marginTop: '2px' }}>{s}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3 SPALTEN VERGLEICH */}
+      <div style={sec}>
+        <div style={lbl}>Direktvergleich — was zahlst du wirklich?</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+          {[
+            { label: heizName, wert: fmt(ergebnis.altKosten), farbe: C.rot, bg: C.rotBg, txt: C.rotDark, pros: ['Steigende Preise', 'CO₂-Steuer', 'Hohe Wartung'], plus: false },
+            { label: 'Wärmepumpe', wert: fmt(ergebnis.wpKosten), farbe: C.gruen, bg: C.bgCard, txt: C.gruenDark, pros: ['Stabile Kosten', 'Unabhängig', 'Klimafreundlich'], plus: true },
+            { label: 'WP + Energiemgmt.', wert: fmt(wpEM), farbe: C.gruenDark, bg: C.gruenBg, txt: C.gruenDark, pros: ['Maximum Ersparnis', 'Automatisch', 'Zukunft'], plus: true },
           ].map((col, i) => (
-            <div key={i} style={{ background: col.bg, borderRadius: '10px', padding: '12px', borderTop: `3px solid ${col.farbe}` }}>
-              <div style={{ fontSize: '9px', color: '#a09e9a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>{col.label}</div>
-              <div style={{ fontSize: '20px', fontWeight: 500, color: col.farbe, marginBottom: '2px' }}>{col.wert}</div>
-              <div style={{ fontSize: '10px', color: '#a09e9a', marginBottom: '8px' }}>pro Jahr</div>
-              {col.pros.map((p, pi) => (
-                <div key={pi} style={{ fontSize: '10px', color: col.plus ? col.farbe : '#E24B4A', marginBottom: '2px' }}>{col.plus ? '✓' : '✕'} {p}</div>
-              ))}
+            <div key={i} style={{ background: col.bg, borderRadius: '10px', padding: '16px', borderTop: `3px solid ${col.farbe}` }}>
+              <div style={{ fontSize: '10px', color: col.txt, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>{col.label}</div>
+              <div style={{ fontSize: '24px', fontWeight: 500, color: col.farbe, letterSpacing: '-0.5px' }}>{col.wert}</div>
+              <div style={{ fontSize: '11px', color: col.txt, marginBottom: '10px' }}>pro Jahr</div>
+              <div style={{ fontSize: '11px', color: col.farbe, lineHeight: 1.6 }}>
+                {col.pros.map((p, pi) => <div key={pi}>{col.plus ? '✓' : '✕'} {p}</div>)}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Balken */}
-      <div style={{ background: '#fff', padding: '16px 28px', borderLeft: '1px solid #e2e1de', borderRight: '1px solid #e2e1de', borderTop: '1px solid #e2e1de' }}>
-        <div style={{ fontSize: '10px', fontWeight: 500, color: '#a09e9a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Kosten über 20 Jahre (3% Preissteigerung p.a.)</div>
-        {[
-          { label: heizLabel[antworten.heizungsart] || 'Heute', wert: Math.round(ergebnis.altKosten * 26.87), farbe: '#E24B4A', breite: '100%' },
-          { label: 'Wärmepumpe', wert: Math.round(ergebnis.wpKosten * 26.87), farbe: '#1D9E75', breite: `${Math.round((ergebnis.wpKosten / ergebnis.altKosten) * 100)}%` },
-          { label: 'WP + Energiemanagement', wert: Math.round(ergebnis.wpKosten * 0.8 * 26.87), farbe: '#085041', breite: `${Math.round((ergebnis.wpKosten * 0.8 / ergebnis.altKosten) * 100)}%` },
-        ].map((item, i) => (
-          <div key={i} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b6966', marginBottom: '4px' }}>
-              <span>{item.label}</span><span style={{ fontWeight: 500, color: item.farbe }}>{fmt(item.wert)}</span>
-            </div>
-            <div style={{ height: '6px', background: '#f0efed', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: item.breite, background: item.farbe, borderRadius: '3px', transition: 'width 1s ease' }} />
-            </div>
-          </div>
-        ))}
+      {/* CHART */}
+      <div style={sec}>
+        <div style={lbl}>Kostenentwicklung über 15 Jahre</div>
+        <div style={{ fontSize: '13px', color: C.grau, marginBottom: '4px' }}>Ab Jahr {ergebnis.amortisation || 8} ist deine Anlage amortisiert — danach sparst du jeden Monat.</div>
+        <div style={{ fontSize: '11px', color: C.hellgrau, marginBottom: '16px' }}>Kumulative Gesamtkosten inkl. CO₂-Steuer</div>
+        <svg viewBox="0 0 620 210" style={{ width: '100%', height: 'auto' }}>
+          {[20, 60, 100, 140, 170].map(y => <line key={y} x1="40" y1={y} x2="600" y2={y} stroke={C.border} strokeWidth="0.5" />)}
+          {[['40k', 23], ['30k', 63], ['20k', 103], ['10k', 143], ['0', 173]].map(([t, y]) => (
+            <text key={t} x="32" y={y} textAnchor="end" fontSize="9" fill={C.hellgrau}>{t}</text>
+          ))}
+          <polygon points="40,170 80,158 160,138 240,112 320,82 400,48 480,20 560,20 560,170" fill={C.rot} opacity="0.06" />
+          <polyline points="40,170 80,158 160,138 240,112 320,82 400,48 480,20 560,20" fill="none" stroke={C.rot} strokeWidth="2" strokeLinejoin="round" />
+          <polygon points="40,170 80,164 160,153 240,142 320,132 400,122 480,112 560,103 560,170" fill={C.gruen} opacity="0.08" />
+          <polyline points="40,170 80,164 160,153 240,142 320,132 400,122 480,112 560,103" fill="none" stroke={C.gruen} strokeWidth="2" strokeLinejoin="round" />
+          <circle cx="380" cy="125" r="5" fill={C.gruen} />
+          <line x1="380" y1="125" x2="380" y2="170" stroke={C.gruen} strokeWidth="0.8" strokeDasharray="3,3" />
+          <rect x="330" y="107" width="100" height="15" rx="3" fill={C.gruen} />
+          <text x="380" y="119" textAnchor="middle" fontSize="9" fill="white" fontWeight="500">✓ Amortisiert: Jahr {ergebnis.amortisation || 8}</text>
+          {[['Heute', 40], ['Jahr 3', 160], ['Jahr 6', 280], ['Jahr 9', 400], ['Jahr 13', 520]].map(([t, x]) => (
+            <text key={t} x={x} y="188" textAnchor="middle" fontSize="9" fill={C.hellgrau}>{t}</text>
+          ))}
+          <rect x="40" y="198" width="12" height="2.5" fill={C.rot} rx="1" />
+          <text x="58" y="201" fontSize="9" fill={C.grau}>{heizName}</text>
+          <rect x="150" y="198" width="12" height="2.5" fill={C.gruen} rx="1" />
+          <text x="168" y="201" fontSize="9" fill={C.grau}>Wärmepumpe</text>
+        </svg>
       </div>
 
-      {/* Abwarten */}
-      <div style={{ background: '#FAFAF8', padding: '16px 28px', borderLeft: '1px solid #e2e1de', borderRight: '1px solid #e2e1de', borderTop: '1px solid #e2e1de' }}>
-        <div style={{ fontSize: '14px', fontWeight: 500, color: '#0a0a0a', marginBottom: '4px' }}>
-          Jede Heizperiode ohne Wärmepumpe bedeutet <span style={{ color: '#E24B4A' }}>{fmt(ergebnis.altKosten)}</span>
+      {/* ZITAT */}
+      <div style={{ background: C.bgSoft, padding: '20px 32px', borderBottom: `0.5px solid ${C.border}` }}>
+        <div style={{ borderLeft: `3px solid ${C.gruen}`, paddingLeft: '14px' }}>
+          <div style={{ fontSize: '14px', fontStyle: 'italic', color: C.grau, lineHeight: 1.6 }}>
+            "Die beste Zeit eine Wärmepumpe zu installieren war vor 5 Jahren. Die zweitbeste Zeit ist heute."
+          </div>
+          <div style={{ fontSize: '11px', color: C.hellgrau, marginTop: '6px' }}>— Energieexperten</div>
         </div>
-        <div style={{ fontSize: '12px', color: '#6b6966', marginBottom: '12px' }}>die du weiter zahlst — ohne Gegenwert.</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-          {[['1 Jahr', 1], ['2 Jahre', 2], ['3 Jahre', 3]].map(([label, mult]) => (
-            <div key={label} style={{ background: '#fff', borderRadius: '8px', padding: '10px', border: '1px solid #e2e1de', textAlign: 'center' }}>
-              <div style={{ fontSize: '10px', color: '#a09e9a', marginBottom: '3px' }}>Noch {label}</div>
-              <div style={{ fontSize: '14px', fontWeight: 500, color: '#E24B4A' }}>{fmt(ergebnis.altKosten * mult)}</div>
-              <div style={{ fontSize: '9px', color: '#a09e9a' }}>noch gezahlt</div>
+      </div>
+
+      {/* SEKTION 2 — FÖRDERUNG */}
+      <div style={{ background: C.bgSoft, padding: '20px 32px', borderBottom: `0.5px solid ${C.border}` }}>
+        <div style={{ fontSize: '11px', fontWeight: 500, color: C.gruenDark, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Förderung</div>
+        <div style={{ fontSize: '22px', fontWeight: 500, color: C.schwarz, letterSpacing: '-0.5px', marginTop: '4px' }}>Transparente Investition &amp; Förderung</div>
+        <div style={{ fontSize: '14px', color: C.grau, marginTop: '8px', lineHeight: 1.6 }}>
+          Der Staat unterstützt den Umstieg so stark wie nie. Mit der Bundesförderung (BEG) bekommst du bis zu <strong style={{ color: C.schwarz }}>70% der förderfähigen Kosten</strong> erstattet.
+        </div>
+      </div>
+
+      {/* INVESTITION */}
+      <div style={sec}>
+        <div style={lbl}>Deine persönliche Investitionsübersicht</div>
+        <div style={{ border: `0.5px solid ${C.border}`, borderRadius: '10px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `0.5px solid ${C.border}`, fontSize: '13px' }}>
+            <span style={{ color: C.grau }}>Durchschnittlicher Angebotspreis</span>
+            <span style={{ fontWeight: 500 }}>{fmt(ergebnis.anlagenPreis)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `0.5px solid ${C.border}`, fontSize: '13px' }}>
+            <span style={{ color: C.grau }}>KfW-Förderung BEG ({ergebnis.foerderProzent}%)</span>
+            <span style={{ fontWeight: 500, color: C.gruen }}>– {fmt(ergebnis.foerderBetrag)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', fontSize: '15px', fontWeight: 500, background: C.bgSoft }}>
+            <span>Deine Netto-Investition</span><span>{fmt(ergebnis.nettoinvest)}</span>
+          </div>
+        </div>
+        <div style={{ fontSize: '11px', color: C.hellgrau, marginTop: '8px' }}>
+          Du zahlst {fmt(ergebnis.anlagenPreis)} an den Installateur. Die KfW-Förderung von {fmt(ergebnis.foerderBetrag)} erhältst du direkt vom Staat zurück.
+        </div>
+      </div>
+
+      {/* AMORTISATIONS PHASEN */}
+      <div style={{ ...sec, background: C.bgSoft }}>
+        <div style={lbl}>Wann zahlt es sich aus?</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
+          {[
+            { n: '1', t: 'Investition', d: 'Jahr 0 — Anlage installiert, Förderung beantragt', aktiv: false },
+            { n: '2', t: 'Einsparungen', d: `Jahr 1–${(ergebnis.amortisation || 8) - 1} — ${fmt(ergebnis.ersparnis)} pro Jahr`, aktiv: false },
+            { n: '✓', t: 'Amortisiert', d: `Jahr ${ergebnis.amortisation || 8} — Investition zurück`, aktiv: true },
+            { n: '+', t: 'Reingewinn', d: 'Jahr 10+ — reine Ersparnis', aktiv: false },
+          ].map((p, i) => (
+            <div key={i} style={{ background: p.aktiv ? C.gruenBg : '#fff', borderRadius: '10px', padding: '12px', border: `0.5px solid ${p.aktiv ? 'rgba(29,158,117,0.2)' : C.border}`, textAlign: 'center' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: p.aktiv ? C.gruen : C.gruenBg, color: p.aktiv ? '#fff' : C.gruenDark, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: '12px', fontWeight: 500 }}>{p.n}</div>
+              <div style={{ fontSize: '11px', fontWeight: 500, color: p.aktiv ? C.gruenDark : C.schwarz, marginBottom: '4px' }}>{p.t}</div>
+              <div style={{ fontSize: '10px', color: p.aktiv ? C.gruenDark : C.hellgrau, lineHeight: 1.4 }}>{p.d}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Investition */}
-      <div style={{ background: '#fff', padding: '16px 28px', borderLeft: '1px solid #e2e1de', borderRight: '1px solid #e2e1de', borderTop: '1px solid #e2e1de' }}>
-        <div style={{ fontSize: '10px', fontWeight: 500, color: '#a09e9a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>Investitionsübersicht</div>
-        {[
-          { label: 'Durchschnittlicher Angebotspreis', wert: fmt(ergebnis.anlagenPreis), farbe: '#6b6966' },
-          { label: `KfW-Förderung BEG (${ergebnis.foerderProzent}%)`, wert: `– ${fmt(ergebnis.foerderBetrag)}`, farbe: '#1D9E75' },
-        ].map(({ label, wert, farbe }) => (
-          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '4px 0', borderBottom: '1px solid #f0efed' }}>
-            <span style={{ color: '#6b6966' }}>{label}</span>
-            <span style={{ color: farbe, fontWeight: 500 }}>{wert}</span>
-          </div>
-        ))}
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 500, padding: '8px 0 0' }}>
-          <span>Ihre Netto-Investition</span><span>{fmt(ergebnis.nettoinvest)}</span>
-        </div>
-        <div style={{ fontSize: '11px', color: '#a09e9a', marginTop: '6px' }}>
-          95% der finalen Angebote stimmen mit dieser Einschätzung überein.
+      {/* 5 TIPPS */}
+      <div style={{ background: C.bgSoft, padding: '20px 32px', borderBottom: `0.5px solid ${C.border}` }}>
+        <div style={{ fontSize: '11px', fontWeight: 500, color: C.gruenDark, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Tipps</div>
+        <div style={{ fontSize: '22px', fontWeight: 500, color: C.schwarz, letterSpacing: '-0.5px', marginTop: '4px' }}>5 Tipps für maximalen Erfolg</div>
+      </div>
+      <div style={sec}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[
+            { t: 'Konzept schlägt Preis', d: 'Achte nicht nur auf den günstigsten Anbieter. Eine falsch dimensionierte Anlage kostet langfristig mehr. Verlange immer eine schriftliche Heizlastberechnung.', hl: false },
+            { t: 'Pufferspeicher richtig dimensionieren', d: 'Ein gut dimensionierter Pufferspeicher reduziert die Taktfrequenz und verlängert die Lebensdauer der Anlage deutlich.', hl: false },
+            { t: 'Energiemanagement anfragen', d: 'Ein smarter Energiemanager lässt WP, PV und Speicher zusammenarbeiten. Bis zu 30% weniger Stromkosten — automatisch.', hl: true },
+            { t: 'Heizlastberechnung ist Pflicht', d: 'Jeder seriöse Installateur erstellt vor dem Angebot eine Heizlastberechnung. Wer das nicht tut, sollte kein Angebot bekommen.', hl: false },
+            { t: 'Angebote wirklich vergleichen', d: 'Vergleiche mindestens 3 Angebote — achte auf Jahresarbeitszahl (JAZ), Garantie und was im Paket enthalten ist.', hl: false },
+          ].map((tip, i) => (
+            <div key={i} style={{ display: 'flex', gap: '16px', padding: '16px', background: tip.hl ? C.gruenBg : C.bgCard, borderRadius: '10px', border: `0.5px solid ${tip.hl ? 'rgba(29,158,117,0.2)' : C.border}` }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: C.gruen, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 500, flexShrink: 0 }}>{i + 1}</div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 500, color: tip.hl ? C.gruenDark : C.schwarz, marginBottom: '4px' }}>{tip.t}</div>
+                <div style={{ fontSize: '13px', color: tip.hl ? '#0F6E56' : C.grau, lineHeight: 1.6 }}>{tip.d}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* CTAs */}
-      <div style={{ background: '#f8f8f7', padding: '20px 28px', borderRadius: '0 0 16px 16px', border: '1px solid #e2e1de', borderTop: 'none' }}>
-        <button onClick={onAngebot} style={{ width: '100%', padding: '14px', background: '#1D9E75', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", marginBottom: '10px' }}>
-          3 Firmen anfragen + persönlichen Report erhalten →
-        </button>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '11px', color: '#a09e9a', marginTop: '10px' }}>
-          <span>🔒 Kein Spam</span><span>📞 Max. 3 Anrufe</span><span>✓ Kostenlos</span>
+      {/* FAHRPLAN */}
+      <div style={{ background: C.bgSoft, padding: '20px 32px', borderBottom: `0.5px solid ${C.border}` }}>
+        <div style={{ fontSize: '11px', fontWeight: 500, color: C.gruenDark, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Fahrplan</div>
+        <div style={{ fontSize: '22px', fontWeight: 500, color: C.schwarz, letterSpacing: '-0.5px', marginTop: '4px' }}>Dein Fahrplan zur neuen Heizung</div>
+      </div>
+      <div style={sec}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ position: 'absolute', left: '19px', top: '32px', bottom: '32px', width: '1px', background: C.border }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {[
+              { n: '1', t: 'Heizcheck Report angefordert', d: 'Du hast diesen Schritt bereits erledigt — dein Report liegt vor.', done: true },
+              { n: '2', t: '3 Fachbetriebe anfragen', d: 'Heizcheck wählt 3 geprüfte Installateure in deiner Region. Kontakt innerhalb 24h.', current: true },
+              { n: '3', t: 'Vor-Ort Termin & Angebote', d: 'Die Betriebe kommen zu dir — kostenlos, unverbindlich. Mindestens 3 Angebote zum Vergleich.' },
+              { n: '4', t: 'Auftrag mit KfW-Klausel', d: 'Du unterschreibst mit KfW-Schutzklausel — falls Förderung abgelehnt wird, ist der Vertrag nichtig. Kein Risiko.', kfw: true },
+              { n: '5', t: 'Installation & Förderung', d: 'Installation in 3–5 Werktagen. Ab jetzt sparst du jeden Monat.' },
+            ].map((s, i) => (
+              <div key={i} style={{ display: 'flex', gap: '16px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 500,
+                  background: s.done || s.current ? (s.done ? C.gruen : C.gruenBg) : C.bgCard,
+                  color: s.done ? '#fff' : s.current ? C.gruenDark : C.hellgrau,
+                  border: s.current ? `1.5px solid ${C.gruen}` : s.done ? 'none' : `0.5px solid ${C.border}` }}>
+                  {s.done ? '✓' : s.n}
+                </div>
+                <div style={{ flex: 1, paddingTop: '6px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 500, color: C.schwarz, marginBottom: '4px' }}>{s.t}</div>
+                  <div style={{ fontSize: '13px', color: C.grau, lineHeight: 1.6 }}>{s.d} {s.done && <span style={{ color: C.gruen, fontWeight: 500 }}>✓ Erledigt</span>}</div>
+                  {s.kfw && (
+                    <div style={{ background: C.gruenBg, borderRadius: '10px', padding: '10px 12px', display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '8px' }}>
+                      <span style={{ fontSize: '14px', color: C.gruen, flexShrink: 0 }}>🛡️</span>
+                      <div style={{ fontSize: '12px', color: C.gruenDark, lineHeight: 1.5 }}><strong>KfW-Klausel schützt dich:</strong> Falls Förderung abgelehnt → Vertrag nichtig. Du zahlst nichts.</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* SEKTION 5 — FIRMEN */}
+      <div style={{ background: C.bgSoft, padding: '20px 32px', borderBottom: `0.5px solid ${C.border}` }}>
+        <div style={{ fontSize: '11px', fontWeight: 500, color: C.gruenDark, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Fachbetriebe</div>
+        <div style={{ fontSize: '22px', fontWeight: 500, color: C.schwarz, letterSpacing: '-0.5px', marginTop: '4px' }}>3 geprüfte Betriebe in deiner Region</div>
+        <div style={{ fontSize: '14px', color: C.grau, marginTop: '8px', lineHeight: 1.6 }}>
+          Basierend auf {stadt || 'deiner PLZ'} haben wir 3 geprüfte Installateure ausgewählt — alle zertifiziert und mit Erfahrung in deiner Anlagengröße.
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div style={{ padding: '24px 32px', background: '#fff' }}>
+        <div style={{ background: C.schwarz, borderRadius: '14px', padding: '28px 24px', textAlign: 'center' }}>
+          <div style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Dein nächster Schritt</div>
+          <div style={{ fontSize: '22px', fontWeight: 500, color: '#fff', letterSpacing: '-0.3px', marginBottom: '8px', lineHeight: 1.2 }}>
+            Jetzt 3 Firmen anfragen
+          </div>
+          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginBottom: '20px' }}>
+            Die Betriebe melden sich innerhalb von 24h{person?.name ? `, ${person.name}` : ''} — {stadt || 'in deiner Region'}
+          </div>
+          <button onClick={onAngebot} style={{ background: C.gruen, border: 'none', borderRadius: '12px', padding: '15px 32px', fontSize: '16px', fontWeight: 500, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}>
+            3 Firmen anfragen →
+          </button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '16px', fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>
+            <span>🔒 Kein Spam</span><span>📞 Max. 3 Anrufe</span><span>✓ Kostenlos</span>
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div style={{ background: C.schwarz, padding: '12px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)' }}>heizcheck.pro · Persönlicher Wärmepumpen-Report</div>
+        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)' }}>95% Angebotsgenauigkeit</div>
+      </div>
+
     </div>
   )
 }
@@ -472,7 +643,6 @@ export default function Konfigurator({ onFertig }) {
           antworten={antworten}
           person={person}
           onAngebot={() => onFertig({ antworten, ergebnis, person, ziel: 'angebot' })}
-          onDownload={() => onFertig({ antworten, ergebnis, person, ziel: 'download' })}
         />
       </div>
     )
