@@ -502,13 +502,13 @@ function FinalReport({ ergebnis, antworten, person, onAngebot }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: freigeschaltet ? 0 : '20px' }}>
           {firmenListe.map((f, i) => (
             <div key={i} style={{
-              border: `0.5px solid ${i === 0 ? C.gruen : C.border}`,
+              border: `0.5px solid ${C.border}`,
               borderRadius: '12px', overflow: 'hidden',
-              background: i === 0 ? C.gruenBg : '#fff'
+              background: '#fff'
             }}>
               <div style={{ padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: i === 0 ? C.gruen : C.bgCard, color: i === 0 ? '#fff' : C.hellgrau, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 500, flexShrink: 0 }}>{i + 1}</div>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: C.bgCard, color: C.hellgrau, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 500, flexShrink: 0 }}>{i + 1}</div>
                   <div style={{ flex: 1 }}>
                     {/* Name — verdeckt oder offen */}
                     <div style={{
@@ -524,18 +524,15 @@ function FinalReport({ ergebnis, antworten, person, onAngebot }) {
                     </div>
                   </div>
                 </div>
-                {i === 0 && !freigeschaltet && (
-                  <div style={{ fontSize: '10px', color: C.gruenDark, background: '#fff', padding: '4px 10px', borderRadius: '20px', fontWeight: 500, flexShrink: 0 }}>Top-Empfehlung</div>
-                )}
                 {freigeschaltet && (
                   <div style={{ fontSize: '10px', color: C.gruenDark, background: C.gruenBg, padding: '4px 10px', borderRadius: '20px', fontWeight: 500, flexShrink: 0 }}>Meldet sich in 24h</div>
                 )}
               </div>
               {/* Fakten */}
               <div style={{ padding: '0 16px 14px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '10px', color: C.gruenDark, background: i === 0 ? '#fff' : C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ KfW zertifiziert</span>
-                <span style={{ fontSize: '10px', color: C.gruenDark, background: i === 0 ? '#fff' : C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ {f.spezial}</span>
-                <span style={{ fontSize: '10px', color: C.gruenDark, background: i === 0 ? '#fff' : C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ Heizlastberechnung</span>
+                <span style={{ fontSize: '10px', color: C.gruenDark, background: C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ KfW zertifiziert</span>
+                <span style={{ fontSize: '10px', color: C.gruenDark, background: C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ {f.spezial}</span>
+                <span style={{ fontSize: '10px', color: C.gruenDark, background: C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ Heizlastberechnung</span>
               </div>
             </div>
           ))}
@@ -546,10 +543,10 @@ function FinalReport({ ergebnis, antworten, person, onAngebot }) {
           <div style={{ background: C.schwarz, borderRadius: '14px', padding: '24px', textAlign: 'center' }}>
             <div style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Letzter Schritt</div>
             <div style={{ fontSize: '20px', fontWeight: 500, color: '#fff', letterSpacing: '-0.3px', marginBottom: '6px', lineHeight: 1.2 }}>
-              Firmen freischalten &amp; Anfrage senden
+              3 Firmen freischalten &amp; Anfrage senden
             </div>
             <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>
-              Gib deine Telefonnummer ein — die 3 Betriebe melden sich innerhalb von 24h bei dir.
+              Mit deiner Telefonnummer werden die 3 Fachbetriebe freigeschaltet und über deine Anfrage informiert. Sie melden sich innerhalb von 24h.
             </div>
             <input
               type="tel"
