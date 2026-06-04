@@ -543,10 +543,10 @@ function FinalReport({ ergebnis, antworten, person, onAngebot }) {
           <div style={{ background: C.schwarz, borderRadius: '14px', padding: '24px', textAlign: 'center' }}>
             <div style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Letzter Schritt</div>
             <div style={{ fontSize: '20px', fontWeight: 500, color: '#fff', letterSpacing: '-0.3px', marginBottom: '6px', lineHeight: 1.2 }}>
-              3 Firmen freischalten &amp; Anfrage senden
+              Hol dir 3 kostenlose Angebote
             </div>
             <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>
-              Mit deiner Telefonnummer werden die 3 Fachbetriebe freigeschaltet und über deine Anfrage informiert. Sie melden sich innerhalb von 24h.
+              Die 3 Fachbetriebe erstellen dir ein unverbindliches Angebot und melden sich innerhalb von 24h bei dir.
             </div>
             <input
               type="tel"
@@ -561,7 +561,7 @@ function FinalReport({ ergebnis, antworten, person, onAngebot }) {
               disabled={laden}
               style={{ background: laden ? 'rgba(29,158,117,0.5)' : C.gruen, border: 'none', borderRadius: '10px', padding: '15px', fontSize: '16px', fontWeight: 500, color: '#fff', cursor: laden ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}
             >
-              {laden ? 'Wird gesendet...' : '🔓 3 Firmen freischalten →'}
+              {laden ? 'Wird gesendet...' : 'Angebote anfordern →'}
             </button>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '16px', fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>
               <span>🔒 Kein Spam</span><span>📞 Max. 3 Anrufe</span><span>✓ Kostenlos</span>
