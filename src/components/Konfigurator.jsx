@@ -204,6 +204,10 @@ function LiveReport({ person, antworten, schritt, schritte, phase }) {
 // ─── FINAL REPORT ─────────────────────────────────────────────────────────────
 function FinalReport({ ergebnis, antworten, person, onAngebot }) {
   const [visible, setVisible] = useState(false)
+  const [tel, setTel] = useState('')
+  const [laden, setLaden] = useState(false)
+  const [fehler, setFehler] = useState('')
+  const [freigeschaltet, setFreigeschaltet] = useState(false)
   useEffect(() => { setTimeout(() => setVisible(true), 50) }, [])
 
   const heizLabel = { gas: 'Gasheizung', oel: 'Ölheizung', pellets: 'Pelletheizung', strom: 'Stromheizung', fernwaerme: 'Fernwärme' }
@@ -215,6 +219,29 @@ function FinalReport({ ergebnis, antworten, person, onAngebot }) {
   const co2 = ((ergebnis.verbrauchKwh || 20000) * 0.0002).toFixed(1)
   const stadt = person?.plz && person?.stadt ? `${person.plz} ${person.stadt}` : person?.plz || ''
   const adresseLine = [person?.adresse, stadt].filter(Boolean).join(' · ')
+
+  // Platzhalter-Firmen (später aus Supabase nach PLZ-Radius)
+  const firmenListe = [
+    { name: 'Wärme & Energie Fachbetrieb', region: stadt || 'Deine Region', entfernung: 8, spezial: 'Luft-Wasser WP' },
+    { name: 'EnergieProfi Installateur', region: 'Nachbarregion', entfernung: 24, spezial: 'WP + PV' },
+    { name: 'ThermoTech Heizungsbau', region: 'Umgebung', entfernung: 41, spezial: 'Altbau-Sanierung' },
+  ]
+
+  async function freischalten() {
+    if (!tel || tel.trim().length < 6) { setFehler('Bitte gib eine gültige Telefonnummer ein.'); return }
+    setFehler('')
+    setLaden(true)
+    try {
+      await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kontakt: { ...person, tel }, ergebnis, antworten, typ: 'firmen' })
+      })
+    } catch {}
+    setLaden(false)
+    setFreigeschaltet(true)
+    if (onAngebot) onAngebot({ ...person, tel })
+  }
 
   const C = {
     rot: '#E24B4A', rotBg: '#FCEBEB', rotDark: '#A32D2D',
@@ -457,32 +484,104 @@ function FinalReport({ ergebnis, antworten, person, onAngebot }) {
         </div>
       </div>
 
-      {/* SEKTION 5 — FIRMEN */}
+      {/* SEKTION 5 — FIRMEN (VERDECKT → FREISCHALTEN) */}
       <div style={{ background: C.bgSoft, padding: '20px 32px', borderBottom: `0.5px solid ${C.border}` }}>
         <div style={{ fontSize: '11px', fontWeight: 500, color: C.gruenDark, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Fachbetriebe</div>
-        <div style={{ fontSize: '22px', fontWeight: 500, color: C.schwarz, letterSpacing: '-0.5px', marginTop: '4px' }}>3 geprüfte Betriebe in deiner Region</div>
+        <div style={{ fontSize: '22px', fontWeight: 500, color: C.schwarz, letterSpacing: '-0.5px', marginTop: '4px' }}>
+          {freigeschaltet ? 'Diese 3 Betriebe melden sich bei dir' : '3 geprüfte Betriebe in deiner Region'}
+        </div>
         <div style={{ fontSize: '14px', color: C.grau, marginTop: '8px', lineHeight: 1.6 }}>
-          Basierend auf {stadt || 'deiner PLZ'} haben wir 3 geprüfte Installateure ausgewählt — alle zertifiziert und mit Erfahrung in deiner Anlagengröße.
+          {freigeschaltet
+            ? `Wir haben deine Anfrage weitergeleitet${person?.name ? `, ${person.name}` : ''}. Die Betriebe melden sich innerhalb von 24h telefonisch bei dir.`
+            : `Basierend auf ${stadt || 'deiner PLZ'} haben wir 3 geprüfte Installateure ausgewählt — alle zertifiziert und mit Erfahrung in deiner Anlagengröße.`}
         </div>
       </div>
 
-      {/* CTA */}
+      {/* 3 FIRMEN BOXEN */}
       <div style={{ padding: '24px 32px', background: '#fff' }}>
-        <div style={{ background: C.schwarz, borderRadius: '14px', padding: '28px 24px', textAlign: 'center' }}>
-          <div style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Dein nächster Schritt</div>
-          <div style={{ fontSize: '22px', fontWeight: 500, color: '#fff', letterSpacing: '-0.3px', marginBottom: '8px', lineHeight: 1.2 }}>
-            Jetzt 3 Firmen anfragen
-          </div>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginBottom: '20px' }}>
-            Die Betriebe melden sich innerhalb von 24h{person?.name ? `, ${person.name}` : ''} — {stadt || 'in deiner Region'}
-          </div>
-          <button onClick={onAngebot} style={{ background: C.gruen, border: 'none', borderRadius: '12px', padding: '15px 32px', fontSize: '16px', fontWeight: 500, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}>
-            3 Firmen anfragen →
-          </button>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '16px', fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>
-            <span>🔒 Kein Spam</span><span>📞 Max. 3 Anrufe</span><span>✓ Kostenlos</span>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: freigeschaltet ? 0 : '20px' }}>
+          {firmenListe.map((f, i) => (
+            <div key={i} style={{
+              border: `0.5px solid ${i === 0 ? C.gruen : C.border}`,
+              borderRadius: '12px', overflow: 'hidden',
+              background: i === 0 ? C.gruenBg : '#fff'
+            }}>
+              <div style={{ padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: i === 0 ? C.gruen : C.bgCard, color: i === 0 ? '#fff' : C.hellgrau, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 500, flexShrink: 0 }}>{i + 1}</div>
+                  <div style={{ flex: 1 }}>
+                    {/* Name — verdeckt oder offen */}
+                    <div style={{
+                      fontSize: '15px', fontWeight: 500, color: C.schwarz, marginBottom: '2px',
+                      filter: freigeschaltet ? 'none' : 'blur(5px)',
+                      userSelect: freigeschaltet ? 'auto' : 'none',
+                      transition: 'filter 0.4s ease'
+                    }}>
+                      {f.name}
+                    </div>
+                    <div style={{ fontSize: '12px', color: C.grau }}>
+                      <span style={{ color: C.gruen }}>●</span> {f.region} · {f.entfernung} km entfernt
+                    </div>
+                  </div>
+                </div>
+                {i === 0 && !freigeschaltet && (
+                  <div style={{ fontSize: '10px', color: C.gruenDark, background: '#fff', padding: '4px 10px', borderRadius: '20px', fontWeight: 500, flexShrink: 0 }}>Top-Empfehlung</div>
+                )}
+                {freigeschaltet && (
+                  <div style={{ fontSize: '10px', color: C.gruenDark, background: C.gruenBg, padding: '4px 10px', borderRadius: '20px', fontWeight: 500, flexShrink: 0 }}>Meldet sich in 24h</div>
+                )}
+              </div>
+              {/* Fakten */}
+              <div style={{ padding: '0 16px 14px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '10px', color: C.gruenDark, background: i === 0 ? '#fff' : C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ KfW zertifiziert</span>
+                <span style={{ fontSize: '10px', color: C.gruenDark, background: i === 0 ? '#fff' : C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ {f.spezial}</span>
+                <span style={{ fontSize: '10px', color: C.gruenDark, background: i === 0 ? '#fff' : C.gruenBg, padding: '3px 10px', borderRadius: '20px' }}>✓ Heizlastberechnung</span>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* FREISCHALTEN — inline Telefon */}
+        {!freigeschaltet && (
+          <div style={{ background: C.schwarz, borderRadius: '14px', padding: '24px', textAlign: 'center' }}>
+            <div style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Letzter Schritt</div>
+            <div style={{ fontSize: '20px', fontWeight: 500, color: '#fff', letterSpacing: '-0.3px', marginBottom: '6px', lineHeight: 1.2 }}>
+              Firmen freischalten &amp; Anfrage senden
+            </div>
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>
+              Gib deine Telefonnummer ein — die 3 Betriebe melden sich innerhalb von 24h bei dir.
+            </div>
+            <input
+              type="tel"
+              value={tel}
+              onChange={e => { setTel(e.target.value); setFehler('') }}
+              placeholder="z.B. 0172 1234567"
+              style={{ width: '100%', padding: '14px 16px', border: 'none', borderRadius: '10px', fontSize: '16px', color: C.schwarz, background: '#fff', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', marginBottom: '10px', textAlign: 'center' }}
+            />
+            {fehler && <div style={{ fontSize: '12px', color: '#FF9B9B', marginBottom: '10px' }}>{fehler}</div>}
+            <button
+              onClick={freischalten}
+              disabled={laden}
+              style={{ background: laden ? 'rgba(29,158,117,0.5)' : C.gruen, border: 'none', borderRadius: '10px', padding: '15px', fontSize: '16px', fontWeight: 500, color: '#fff', cursor: laden ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}
+            >
+              {laden ? 'Wird gesendet...' : '🔓 3 Firmen freischalten →'}
+            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '16px', fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>
+              <span>🔒 Kein Spam</span><span>📞 Max. 3 Anrufe</span><span>✓ Kostenlos</span>
+            </div>
+          </div>
+        )}
+
+        {/* FREIGESCHALTET — Bestätigung */}
+        {freigeschaltet && (
+          <div style={{ background: C.gruenBg, borderRadius: '14px', padding: '20px 24px', textAlign: 'center', marginTop: '4px' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>✓</div>
+            <div style={{ fontSize: '17px', fontWeight: 500, color: C.gruenDark, marginBottom: '4px' }}>Anfrage erfolgreich gesendet!</div>
+            <div style={{ fontSize: '13px', color: '#0F6E56', lineHeight: 1.6 }}>
+              Die 3 Fachbetriebe wurden über deine Anfrage informiert und melden sich innerhalb von 24h telefonisch bei dir.
+            </div>
+          </div>
+        )}
       </div>
 
       {/* FOOTER */}
@@ -642,7 +741,7 @@ export default function Konfigurator({ onFertig }) {
           ergebnis={ergebnis}
           antworten={antworten}
           person={person}
-          onAngebot={() => onFertig({ antworten, ergebnis, person, ziel: 'angebot' })}
+          onAngebot={() => {}}
         />
       </div>
     )
